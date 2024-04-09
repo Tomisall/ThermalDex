@@ -19,7 +19,7 @@ ThermalDex is an application developed in Python using RDKit and PyQt5 that faci
 
 - **PDF Report Generation**: The application generates detailed PDF reports of thermal hazard assessments for each molecule, providing comprehensive documentation of the analysis results.
 
-- **Local Storage**: ThermalDex maintains a user-friendly local .csv file 'database' (cough) that stores all assessment results, making it easy to track and manage data over time.
+- **Local Storage**: ThermalDex maintains a user-friendly local .csv file that stores all assessment results, making it easy to track and manage data over time. ThermalDex uses sqlite to store all results and changes to help prevent data loss. This can be found as 'ThermalDex.db' in the _core folder.
 
 <p><small>[1]: <i>Org. Proc. Res. Dev.,</i> 2021, 25, 2, 212-224</small><br>
 <small>[2]: <i>Angew. Chem. Int. Ed.,</i> 2020, 59, 15798-15802</small><br>

@@ -9,6 +9,7 @@ from thermDex.thermDexPlots import *
 from thermDex.thermDexPandasTools import *
 import pyperclip
 import configparser
+import sqlite3
 from numpy import log10
 from contextlib import redirect_stdout
 from os import path, environ
@@ -1743,6 +1744,15 @@ class MolDrawer(QWidget):
             layout.removeWidget(self.error_message)
         #except:
          #   window.showErrorMessage("Generating Memo PDF from given values.")
+            
+    def sqlite_db_implementation(self, pandas_data):
+        sqlite_db_connection = sqlite3.connect('./_core/ThermalDex.db')
+        sqlite_db_cursor = sqlite_db_connection.cursor()
+        now = datetime.now()
+        neatNow = now.strftime("%d-%b-%Y_%H-%M-%S")
+        #column_headers = tuple(pandas_data.columns.values)
+        #sqlite_db_cursor.execute(f"CREATE TABLE {neatNow}{column_headers}")
+        pandas_data.to_sql(name=neatNow, con=sqlite_db_connection)
 
     def writeToDatabase(self, molecule, Database):
         #molecule.genAdditionalValues()
@@ -1782,6 +1792,8 @@ class MolDrawer(QWidget):
         outputData = outputData[ ['SMILES'] + [ col for col in outputData.columns if col != 'SMILES' ] ]
         print(outputData)
         outputData.to_csv(Database, index=False)
+        sql_data = outputData.drop('SMILES', axis=1)
+        self.sqlite_db_implementation(sql_data)
 
     def getColorForValue(self, hazardClass):
         # Color-coding logic

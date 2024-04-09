@@ -8,39 +8,129 @@ oreohazardlimit: High Hazard
 oreohazardwarningscale: <5 g
 
 show_result run, resetIndex = False
+Database not empty, current index = 0
+
+The current row (as a dict) is: {'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': 156.0, 'mpEnd': 160.0, 'Q_dsc': 520.0, 'Qunits': 'J g⁻¹', 'onsetT': 225.0, 'initT': 420.0, 'proj': 'RepTest', 'MW': 141.557, 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': 0, 'HEG_list': '[]', 'EFG': 0, 'EFG_list': '[]', 'RoS_val': -6, 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': -146.93727615024338, 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': -0.287750763862707, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.3156185044779596, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 248.0, 'oreo': 9, 'oreoSmallScale_val': 10, 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': 11, 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': 13, 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': 17, 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': nan, 'CAS_no': nan, 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
+oreohazardlimit: High Hazard
+oreohazardwarningscale: <5 g
+{'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': 156.0, 'mpEnd': 160.0, 'Q_dsc': 520.0, 'Qunits': 'J g⁻¹', 'onsetT': 225.0, 'initT': 420.0, 'proj': 'RepTest', 'MW': 141.557, 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': 0, 'HEG_list': '[]', 'EFG': 0, 'EFG_list': '[]', 'RoS_val': -6, 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': -146.93727615024338, 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': -0.287750763862707, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.3156185044779596, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 248.0, 'oreo': 9, 'oreoSmallScale_val': 10, 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': 11, 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': 13, 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': 17, 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': '', 'CAS_no': '', 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
+
+
+
+<PyQt5.QtGui.QColor object at 0x000001D7E2B77A00>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC84A0>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC86D0>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8740>
+oreohazardlimit: High Hazard
+oreohazardwarningscale: <5 g
+| OREOS | EFG: 0 -> OREOS SubTotal: 1
+| OREOS | RoS:  <b>(Not Explosive)</b> -> OREOS SubTotal: 3
+| OREOS | OB: <b>(Medium Risk)</b> -> OREOS SubTotal: 7
+Onset Temperature given as 225.0
+| OREOS | Tonset: 225.0 -> OREOS SubTotal: 9
+['Low Hazard', 'Low Hazard', 'Low Hazard', 'Low Hazard']
+Tinit given as 420.0
+T_D24 =248.0
+Qdsc given as 520.0 J g⁻¹
+124.28298279158699
+IS = -0.28775076386270704
+EP = -0.3156185044779596
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8890>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8820>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8B30>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8AC0>
+oreohazardlimit: High Hazard
+oreohazardwarningscale: <5 g
+{'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': '156.0', 'mpEnd': '160.0', 'Q_dsc': '520.0', 'Qunits': 'J g⁻¹', 'onsetT': '225.0', 'initT': '420.0', 'proj': 'RepTest', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed', 'MW': '141.557', 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': '0', 'HEG_list': '[]', 'EFG': '0', 'EFG_list': '[]', 'RoS_val': '-6', 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': '-146.93727615024338', 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': '-0.28775076386270704', 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': '-0.3156185044779596', 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': '248.0', 'oreo': '9', 'oreoSmallScale_val': '10', 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': '11', 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': '13', 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': '17', 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': '', 'CAS_no': '', 'mol': '<rdkit.Chem.rdchem.Mol object at 0x000001D7E2EC8BA0>', 'molPixmap': 'None', 'molIMG': 'None', 'mwStr': '141.56', 'obStr': '-146.94', 'isStr': '-0.29', 'epStr': '-0.32', 'eleList': "[('C', '6'), ('H', '4'), ('Cl', ''), ('N', ''), ('O', '')]", 'Catoms': '6', 'Hatoms': '4', 'Oatoms': '1', 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12'}
+            SMILES                    name     mp  mpEnd  Q_dsc  ... Catoms Hatoms Oatoms yoshidaMethod                                         dataFolder
+0  O=C(Cl)c1ccncc1  isonicotinoyl chloride  156.0  160.0  520.0  ...      6      4      1        Pfizer  ./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-...
+
+[1 rows x 51 columns]
+                          SMILES                    name     mp  mpEnd  Q_dsc  ... oreoLargeScale_des IUPAC_name CAS_no yoshidaMethod                                         dataFolder
+O=C(Cl)c1ccncc1  O=C(Cl)c1ccncc1  isonicotinoyl chloride  156.0  160.0  520.0  ...         Low Hazard                          Pfizer  ./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-...
+
+[1 rows x 40 columns]
+
+
+
+
+found
+[0]
+./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12
+                                      SMILES                    name     mp  mpEnd   Q_dsc  ... CAS_no yoshidaMethod                                         dataFolder     hammerDrop       friction
+SMILES                                                                                      ...                                                                                                      
+O=C(Cl)c1ccncc1              O=C(Cl)c1ccncc1  isonicotinoyl chloride  156.0  160.0   520.0  ...               Pfizer  ./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-...  Not Performed  Not Performed
+Clc1nn[nH]n1                    Clc1nn[nH]n1                     NaN    NaN    NaN   600.0  ...    NaN        Pfizer  ./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32  Not Performed  Not Performed
+CS(=O)(=O)N=[N+]=[N-]  CS(=O)(=O)N=[N+]=[N-]                     NaN    NaN    NaN  2330.0  ...    NaN        Pfizer  ./_core/UserAddedData/CH3N3O2S_07-Mar-2024_18-...  Not Performed  Not Performed
+
+[3 rows x 40 columns]
+
+
+thermalDexMolecule(SMILES='O=C(Cl)c1ccncc1', name='isonicotinoyl chloride', mp='156.0', mpEnd='160.0', Q_dsc=520.0, Qunits='J g⁻¹', onsetT=225.0, initT=420.0, proj='RepTest', hammerDrop='Not Performed', friction='Not Performed', MW=141.557, molForm='C6H4ClNO', eleComp='6C, 4H, Cl, N, O', HEG=0, HEG_list=[], EFG=0, EFG_list=[], RoS_val=-6, RoS_des=' <b>(Not Explosive)</b>', OB_val=-146.93727615024338, OB_des='<b>(Medium Risk)</b>', IS_val=-0.28775076386270704, IS_des=' <b>(Not Impact Sensitive)</b>', EP_val=-0.3156185044779596, EP_des=' <b>(Should Not Propagate)</b>', Td24=248.0, oreo=9, oreoSmallScale_val=10, oreoSmallScale_des='Low Hazard', oreoTensScale_val=11, oreoTensScale_des='Low Hazard', oreoHundsScale_val=13, oreoHundsScale_des='Low Hazard', oreoLargeScale_val=17, oreoLargeScale_des='Low Hazard', IUPAC_name='', CAS_no='', mol=<rdkit.Chem.rdchem.Mol object at 0x000001D7E2B778B0>, molPixmap=None, molIMG=None, mwStr='141.56', obStr='-146.94', isStr='-0.29', epStr='-0.32', eleList=[('C', '6'), ('H', '4'), ('Cl', ''), ('N', ''), ('O', '')], Catoms=6, Hatoms=4, Oatoms=1, yoshidaMethod='Pfizer', dataFolder='./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12')
+
+
+
+show_result run, resetIndex = False
 Database not empty, current index = 1
 
 The current row (as a dict) is: {'SMILES': 'Clc1nn[nH]n1', 'name': nan, 'mp': nan, 'mpEnd': nan, 'Q_dsc': 600.0, 'Qunits': 'J g⁻¹', 'onsetT': 190.0, 'initT': 170.0, 'proj': nan, 'MW': 104.5, 'molForm': 'CHClN4', 'eleComp': 'C, H, Cl, 4N', 'HEG': 1, 'HEG_list': "['N1N=CN=N1']", 'EFG': 1, 'EFG_list': "['N1N=CN=N1']", 'RoS_val': 5, 'RoS_des': ' <b>(Explosive)</b>', 'OB_val': -38.27751196172249, 'OB_des': '<b>(High Risk)</b>', 'IS_val': -0.0208817553510836, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.1454233495765371, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 72.99999999999999, 'oreo': 28, 'oreoSmallScale_val': 29, 'oreoSmallScale_des': 'High Hazard', 'oreoTensScale_val': 30, 'oreoTensScale_des': 'High Hazard', 'oreoHundsScale_val': 32, 'oreoHundsScale_des': 'High Hazard', 'oreoLargeScale_val': 36, 'oreoLargeScale_des': 'High Hazard', 'IUPAC_name': nan, 'CAS_no': nan, 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
 oreohazardlimit: High Hazard
 oreohazardwarningscale: <5 g
+{'SMILES': 'Clc1nn[nH]n1', 'name': '', 'mp': '', 'mpEnd': '', 'Q_dsc': 600.0, 'Qunits': 'J g⁻¹', 'onsetT': 190.0, 'initT': 170.0, 'proj': '', 'MW': 104.5, 'molForm': 'CHClN4', 'eleComp': 'C, H, Cl, 4N', 'HEG': 1, 'HEG_list': "['N1N=CN=N1']", 'EFG': 1, 'EFG_list': "['N1N=CN=N1']", 'RoS_val': 5, 'RoS_des': ' <b>(Explosive)</b>', 'OB_val': -38.27751196172249, 'OB_des': '<b>(High Risk)</b>', 'IS_val': -0.0208817553510836, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.1454233495765371, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 72.99999999999999, 'oreo': 28, 'oreoSmallScale_val': 29, 'oreoSmallScale_des': 'High Hazard', 'oreoTensScale_val': 30, 'oreoTensScale_des': 'High Hazard', 'oreoHundsScale_val': 32, 'oreoHundsScale_des': 'High Hazard', 'oreoLargeScale_val': 36, 'oreoLargeScale_des': 'High Hazard', 'IUPAC_name': '', 'CAS_no': '', 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
 
-show_result run, resetIndex = False
-Database not empty, current index = 0
 
-The current row (as a dict) is: {'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': 156.0, 'mpEnd': 160.0, 'Q_dsc': 520.0, 'Qunits': 'J g⁻¹', 'onsetT': 225.0, 'initT': 420.0, 'proj': 'RepTest', 'MW': 141.557, 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': 0, 'HEG_list': '[]', 'EFG': 0, 'EFG_list': '[]', 'RoS_val': -6, 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': -146.93727615024338, 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': -0.287750763862707, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.3156185044779596, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 248.0, 'oreo': 9, 'oreoSmallScale_val': 10, 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': 11, 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': 13, 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': 17, 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': nan, 'CAS_no': nan, 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
+
+<PyQt5.QtGui.QColor object at 0x000001D7E2B77920>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8660>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC86D0>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8970>
 oreohazardlimit: High Hazard
 oreohazardwarningscale: <5 g
-No mrv XML found.
-[141.557, 104.5]
-
-show_result run, resetIndex = True
-Database not empty, current index = 0
-
-The current row (as a dict) is: {'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': 156.0, 'mpEnd': 160.0, 'Q_dsc': 520.0, 'Qunits': 'J g⁻¹', 'onsetT': 225.0, 'initT': 420.0, 'proj': 'RepTest', 'MW': 141.557, 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': 0, 'HEG_list': '[]', 'EFG': 0, 'EFG_list': '[]', 'RoS_val': -6, 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': -146.93727615024338, 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': -0.287750763862707, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.3156185044779596, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 248.0, 'oreo': 9, 'oreoSmallScale_val': 10, 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': 11, 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': 13, 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': 17, 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': nan, 'CAS_no': nan, 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
+High Energy Group Found: N1N=CN=N1
+Explosive Group Found: N1N=CN=N1
+| OREOS | EFG: 1 -> OREOS SubTotal: 8
+| OREOS | RoS:  <b>(Explosive)</b> -> OREOS SubTotal: 16
+| OREOS | OB: <b>(High Risk)</b> -> OREOS SubTotal: 24
+Onset Temperature given as 190.0
+| OREOS | Tonset: 190.0 -> OREOS SubTotal: 28
+['High Hazard', 'High Hazard', 'High Hazard', 'High Hazard']
+Tinit given as 170.0
+T_D24 =72.99999999999999
+Qdsc given as 600.0 J g⁻¹
+143.40344168260037
+IS = 0.009420853317539502
+EP = -0.1294303061125417
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8820>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC87B0>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC8F20>
+<PyQt5.QtGui.QColor object at 0x000001D7E2EC9620>
 oreohazardlimit: High Hazard
 oreohazardwarningscale: <5 g
+{'SMILES': 'Clc1nn[nH]n1', 'name': '', 'mp': '', 'mpEnd': '', 'Q_dsc': '600.0', 'Qunits': 'J g⁻¹', 'onsetT': '190.0', 'initT': '170.0', 'proj': '', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed', 'MW': '104.5', 'molForm': 'CHClN4', 'eleComp': 'C, H, Cl, 4N', 'HEG': '1', 'HEG_list': "['N1N=CN=N1']", 'EFG': '1', 'EFG_list': "['N1N=CN=N1']", 'RoS_val': '5', 'RoS_des': ' <b>(Explosive)</b>', 'OB_val': '-38.27751196172249', 'OB_des': '<b>(High Risk)</b>', 'IS_val': '0.009420853317539502', 'IS_des': ' <b>(Impact Sensitive)</b>', 'EP_val': '-0.1294303061125417', 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': '72.99999999999999', 'oreo': '28', 'oreoSmallScale_val': '29', 'oreoSmallScale_des': 'High Hazard', 'oreoTensScale_val': '30', 'oreoTensScale_des': 'High Hazard', 'oreoHundsScale_val': '32', 'oreoHundsScale_des': 'High Hazard', 'oreoLargeScale_val': '36', 'oreoLargeScale_des': 'High Hazard', 'IUPAC_name': '', 'CAS_no': '', 'mol': '<rdkit.Chem.rdchem.Mol object at 0x000001D7E2EC8B30>', 'molPixmap': 'None', 'molIMG': 'None', 'mwStr': '104.50', 'obStr': '-38.28', 'isStr': '0.01', 'epStr': '-0.13', 'eleList': "[('C', ''), ('H', ''), ('Cl', ''), ('N', '4')]", 'Catoms': '1', 'Hatoms': '1', 'Oatoms': '0', 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32'}
+         SMILES name mp mpEnd  Q_dsc Qunits onsetT  ...  epStr                                         eleList Catoms Hatoms Oatoms yoshidaMethod                                         dataFolder
+0  Clc1nn[nH]n1                600.0  J g⁻¹  190.0  ...  -0.13  [('C', ''), ('H', ''), ('Cl', ''), ('N', '4')]      1      1      0        Pfizer  ./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32
+
+[1 rows x 51 columns]
+                    SMILES name mp mpEnd  Q_dsc Qunits onsetT  ... oreoHundsScale_des oreoLargeScale_val oreoLargeScale_des IUPAC_name CAS_no yoshidaMethod                                         dataFolder
+Clc1nn[nH]n1  Clc1nn[nH]n1                600.0  J g⁻¹  190.0  ...        High Hazard                 36        High Hazard                          Pfizer  ./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32
+
+[1 rows x 40 columns]
 
 
-Database:
-            SMILES                    name     mp  ...                                         dataFolder     hammerDrop       friction
-0  O=C(Cl)c1ccncc1  isonicotinoyl chloride  156.0  ...  ./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-...  Not Performed  Not Performed
-1     Clc1nn[nH]n1                     NaN    NaN  ...  ./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32  Not Performed  Not Performed
-
-[2 rows x 40 columns]
-
-Current:
-{'SMILES': 'O=C(Cl)c1ccncc1', 'name': 'isonicotinoyl chloride', 'mp': 156.0, 'mpEnd': 160.0, 'Q_dsc': 520.0, 'Qunits': 'J g⁻¹', 'onsetT': 225.0, 'initT': 420.0, 'proj': 'RepTest', 'MW': 141.557, 'molForm': 'C6H4ClNO', 'eleComp': '6C, 4H, Cl, N, O', 'HEG': 0, 'HEG_list': '[]', 'EFG': 0, 'EFG_list': '[]', 'RoS_val': -6, 'RoS_des': ' <b>(Not Explosive)</b>', 'OB_val': -146.93727615024338, 'OB_des': '<b>(Medium Risk)</b>', 'IS_val': -0.287750763862707, 'IS_des': ' <b>(Not Impact Sensitive)</b>', 'EP_val': -0.3156185044779596, 'EP_des': ' <b>(Should Not Propagate)</b>', 'Td24': 248.0, 'oreo': 9, 'oreoSmallScale_val': 10, 'oreoSmallScale_des': 'Low Hazard', 'oreoTensScale_val': 11, 'oreoTensScale_des': 'Low Hazard', 'oreoHundsScale_val': 13, 'oreoHundsScale_des': 'Low Hazard', 'oreoLargeScale_val': 17, 'oreoLargeScale_des': 'Low Hazard', 'IUPAC_name': nan, 'CAS_no': nan, 'yoshidaMethod': 'Pfizer', 'dataFolder': './_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-13-12', 'hammerDrop': 'Not Performed', 'friction': 'Not Performed'}
 
 
-xvalues = Log(Tonset-25)
-yvalues = Log(Qdsc)
+found
+[1]
+./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32
+                                      SMILES                    name     mp  mpEnd   Q_dsc  ... CAS_no yoshidaMethod                                         dataFolder     hammerDrop       friction
+SMILES                                                                                      ...                                                                                                      
+O=C(Cl)c1ccncc1              O=C(Cl)c1ccncc1  isonicotinoyl chloride  156.0  160.0   520.0  ...    NaN        Pfizer  ./_core/UserAddedData/C6H4ClNO_21-Feb-2024_15-...  Not Performed  Not Performed
+Clc1nn[nH]n1                    Clc1nn[nH]n1                                         600.0  ...               Pfizer  ./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32  Not Performed  Not Performed
+CS(=O)(=O)N=[N+]=[N-]  CS(=O)(=O)N=[N+]=[N-]                     NaN    NaN    NaN  2330.0  ...    NaN        Pfizer  ./_core/UserAddedData/CH3N3O2S_07-Mar-2024_18-...  Not Performed  Not Performed
+
+[3 rows x 40 columns]
+
+
+thermalDexMolecule(SMILES='Clc1nn[nH]n1', name='', mp='', mpEnd='', Q_dsc=600.0, Qunits='J g⁻¹', onsetT=190.0, initT=170.0, proj='', hammerDrop='Not Performed', friction='Not Performed', MW=104.5, molForm='CHClN4', eleComp='C, H, Cl, 4N', HEG=1, HEG_list=['N1N=CN=N1'], EFG=1, EFG_list=['N1N=CN=N1'], RoS_val=5, RoS_des=' <b>(Explosive)</b>', OB_val=-38.27751196172249, OB_des='<b>(High Risk)</b>', IS_val=0.009420853317539502, IS_des=' <b>(Impact Sensitive)</b>', EP_val=-0.1294303061125417, EP_des=' <b>(Should Not Propagate)</b>', Td24=72.99999999999999, oreo=28, oreoSmallScale_val=29, oreoSmallScale_des='High Hazard', oreoTensScale_val=30, oreoTensScale_des='High Hazard', oreoHundsScale_val=32, oreoHundsScale_des='High Hazard', oreoLargeScale_val=36, oreoLargeScale_des='High Hazard', IUPAC_name='', CAS_no='', mol=<rdkit.Chem.rdchem.Mol object at 0x000001D7E2B77A00>, molPixmap=None, molIMG=None, mwStr='104.50', obStr='-38.28', isStr='0.01', epStr='-0.13', eleList=[('C', ''), ('H', ''), ('Cl', ''), ('N', '4')], Catoms=1, Hatoms=1, Oatoms=0, yoshidaMethod='Pfizer', dataFolder='./_core/UserAddedData/CHClN4_04-Mar-2024_10-48-32')
+
+
