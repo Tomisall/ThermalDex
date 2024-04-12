@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QGraphicsView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem
-from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QGraphicsView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox
+from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont, QPalette
 from PyQt5.QtCore import Qt, QRegExp, pyqtSignal, QEvent
 from thermDex.thermDexMolecule import *
 from thermDex.thermDexHTMLRep import *
@@ -273,7 +273,16 @@ class MolDrawer(QWidget):
         # Input field for Q_DSC string
         self.Qdsc_input = QLineEdit(self)
         self.Qdsc_input.setValidator(posNumValidator)
-        InputRightLayout.addWidget(QLabel('Q<sub>DSC</sub>:'))
+        QLabelSubLayout = QHBoxLayout()
+        QLabelSubLayout.addWidget(QLabel('Q<sub>DSC</sub>:'))
+        # DSC run check
+        self.dsc_check = QCheckBox('No Peak')
+        self.dsc_check.setChecked(False)
+        self.dsc_check.stateChanged.connect(self.check_if_dsc_performed)
+        #QLabelSubLayout.addSpacing(100)
+        QLabelSubLayout.addStretch()
+        QLabelSubLayout.addWidget(self.dsc_check)
+        #QLabelSubLayout.addStretch()
         QUnitsSubLayout = QHBoxLayout()
         QUnitsSubLayout.addWidget(self.Qdsc_input)
         #QUnitsSubLayout.addWidget(QLabel('cal g<sup>-1</sup> '))
@@ -281,6 +290,7 @@ class MolDrawer(QWidget):
         self.QUnitsSelection.addItems(['J g⁻¹', 'cal g⁻¹'])
         self.QUnitsSelection.setCurrentIndex(int(qdscUnits))
         QUnitsSubLayout.addWidget(self.QUnitsSelection)
+        InputRightLayout.addLayout(QLabelSubLayout)
         InputRightLayout.addLayout(QUnitsSubLayout)
 
         # Input field for Onset string
@@ -1454,6 +1464,40 @@ class MolDrawer(QWidget):
             
         QMessageBox.information(self, "Settings Saved", "Settings have been saved.")
 
+    def check_if_dsc_performed(self):
+        if self.dsc_check.isChecked():
+            self.Qdsc_input.setReadOnly(True)
+            self.TE_input.setReadOnly(True)
+            self.Tinit_input.setReadOnly(True)
+            self.Qdsc_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : lightgrey;"
+                                "}") 
+            self.TE_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : lightgrey;"
+                                "}")
+            self.Tinit_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : lightgrey;"
+                                "}")
+        else:          
+            self.Qdsc_input.setReadOnly(False)
+            self.TE_input.setReadOnly(False)
+            self.Tinit_input.setReadOnly(False)
+            self.Qdsc_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : white;"
+                                "}") 
+            self.TE_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : white;"
+                                "}")
+            self.Tinit_input.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : white;"
+                                "}")
+  
 
     def changeTabForEditing(self):
         #try:
@@ -1483,6 +1527,11 @@ class MolDrawer(QWidget):
         self.QUnitsSelection.setCurrentIndex(comboIndex)
         self.TE_input.setText(str(readMolecule.onsetT))
         self.Tinit_input.setText(str(readMolecule.initT))
+        if readMolecule.noDSCPeak == '':
+            self.dsc_check.setChecked(False)
+        else:
+            self.dsc_check.setChecked(True)
+        self.check_if_dsc_performed()
         self.proj_input.setText(str(readMolecule.proj))
         niceMWStr = "{:.2f}".format(readMolecule.MW)
         self.mwLabel.setText('MW: ' + niceMWStr) #str(readMolecule.MW))
@@ -1805,6 +1854,12 @@ class MolDrawer(QWidget):
             return QColor(0, 255, 0)  # Green
         else:
             return QColor(0, 0, 255)  # Blue
+        
+    def get_dsc_checkstate(self):
+        if self.dsc_check.isChecked():
+            return 'True'
+        else:
+            return ''
 
     def genMoleculeFromUserInput(self):
         # Get the SMILES string from the input field
@@ -1821,9 +1876,10 @@ class MolDrawer(QWidget):
         friction = self.fricSelection.currentText()
 
         dataFolder = self.findFolder(defaultDB)
+        noDSCPeak = self.get_dsc_checkstate()
 
         # Create an RDKit molecule from the SMILES string
-        addedMolecule = thermalDexMolecule(SMILES=smiles, name=name, mp=mp, mpEnd=mpEnd, Q_dsc=Qdsc, Qunits=QUnits, onsetT=TE, initT=Tinit, proj=proj, hammerDrop=hammerDrop, friction=friction, dataFolder=dataFolder, yoshidaMethod=yoshidaMethod)
+        addedMolecule = thermalDexMolecule(SMILES=smiles, name=name, mp=mp, mpEnd=mpEnd, Q_dsc=Qdsc, Qunits=QUnits, onsetT=TE, initT=Tinit, proj=proj, hammerDrop=hammerDrop, friction=friction, dataFolder=dataFolder, yoshidaMethod=yoshidaMethod, noDSCPeak=noDSCPeak)
         return addedMolecule
     
     def check_if_oreos_need_approval(self, molecule):
@@ -1946,11 +2002,11 @@ class MolDrawer(QWidget):
                     self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b>')
                     self.lhs_title.setText("Title")
                 
-            if addedMolecule.onsetT != 'nan' and addedMolecule.onsetT != '' and addedMolecule.onsetT != None and addedMolecule.onsetT <= 24.99:
+            if addedMolecule.noDSCPeak == '' and addedMolecule.onsetT != 'nan' and addedMolecule.onsetT != '' and addedMolecule.onsetT != None and addedMolecule.onsetT <= 24.99:
                 self.error_message = QLabel('Sub-Ambient Onset Temperature? Are you sure? Yoshida values will not be accurate.')
                 layout.addWidget(self.error_message)
                 self.error_flag = 201
-            if addedMolecule.initT != 'nan' and addedMolecule.initT != '' and addedMolecule.initT != None and addedMolecule.initT <= 24.99:
+            if addedMolecule.noDSCPeak == '' and addedMolecule.initT != 'nan' and addedMolecule.initT != '' and addedMolecule.initT != None and addedMolecule.initT <= 24.99:
                 self.error_message = QLabel('Sub-Ambient Initiation Temperature? Are you sure? Yoshida values will not be accurate.')
                 layout.addWidget(self.error_message)
                 self.error_flag = 202

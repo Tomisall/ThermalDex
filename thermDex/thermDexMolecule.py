@@ -71,6 +71,7 @@ class thermalDexMolecule:
     Oatoms: int = None
     yoshidaMethod: str = 'Pfizer'
     dataFolder: str = ''
+    noDSCPeak: str = ''
 
     def genMol(self):
         RDmol = MolFromSmiles(self.SMILES)
@@ -288,7 +289,7 @@ class thermalDexMolecule:
         print(f'| OREOS | OB: {self.OB_des} -> OREOS SubTotal: {self.oreo}')
 
     def oreoOnsetTadjustment(self):
-        if self.onsetT != 'nan' and self.onsetT != '' and self.onsetT != None:
+        if self.onsetT != 'nan' and self.onsetT != '' and self.onsetT != None and self.noDSCPeak == '':
             print('Onset Temperature given as ' + str(self.onsetT))
             self.onsetT = float(self.onsetT)
             if self.onsetT <= 125:
@@ -299,6 +300,8 @@ class thermalDexMolecule:
                 self.oreo += 2
             elif self.onsetT > 300:
                 self.oreo += 1
+        elif self.noDSCPeak == 'True':
+            self.onsetT = None
         else:
             self.onsetT = None
         print(f'| OREOS | Tonset: {self.onsetT} -> OREOS SubTotal: {self.oreo}')
@@ -312,9 +315,11 @@ class thermalDexMolecule:
         scaleList = [self.oreoSmallScale_val, self.oreoTensScale_val, self.oreoHundsScale_val, self.oreoLargeScale_val]
         hazardList = []
 
-        if self.onsetT == None:
+        if self.onsetT == None and self.noDSCPeak == '':
             hazardValuesRangeList = [15, 22]
         elif self.onsetT != None:
+            hazardValuesRangeList = [18, 28]
+        elif self.noDSCPeak == 'True':
             hazardValuesRangeList = [18, 28]
 
         for scale in scaleList:
@@ -335,7 +340,7 @@ class thermalDexMolecule:
 
     def Td24FromThermalProps(self):
         # Estimation of Maximum Recommended Process Temperature To Avoid Hazardous Thermal Decomposition
-        if self.initT != 'nan' and self.initT != '' and self.initT != None:
+        if self.initT != 'nan' and self.initT != '' and self.initT != None and self.noDSCPeak == '':
             print('Tinit given as ' + str(self.initT))
             self.initT = float(self.initT)
             d24Temp = 0.7*self.initT - 46
@@ -355,7 +360,7 @@ class thermalDexMolecule:
             EPConstant = 0.285
 
         # Perform the calculation
-        if T_yoshida != 'nan' and T_yoshida != '' and T_yoshida != None and self.Q_dsc != 'nan' and self.Q_dsc != '' and self.Q_dsc != None:
+        if T_yoshida != 'nan' and T_yoshida != '' and T_yoshida != None and self.Q_dsc != 'nan' and self.Q_dsc != '' and self.Q_dsc != None and self.noDSCPeak == '':
                 # Convert Qdsc to cal/g if needed
                 print('Qdsc given as ' + str(self.Q_dsc) + ' ' + self.Qunits)
                 self.Q_dsc = float(self.Q_dsc)
