@@ -44,12 +44,12 @@ To get started with ThermalDex, follow these steps:
    pip install -r requirements.txt
    ```
 
-3. Launch the application:
+4. Launch the application:
    ```
    python ThermalDex.py
    ```
 
-4. Input the SMILES notation of the molecule you wish to analyze and explore the various features and tools offered by ThermalDex.
+5. Input the SMILES notation of the molecule you wish to analyze and explore the various features and tools offered by ThermalDex. Note you will need to add at least one compond before trying the search feature, otherwise this may result in a crash.
 
 ## Contributing
 
