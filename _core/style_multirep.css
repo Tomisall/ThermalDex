@@ -1,0 +1,112 @@
+@page {
+        size: A4 landscape;
+
+  @frame content_frame {          /* Content Frame */
+     left: 50pt;
+     /*right: 50pt;*/
+     width: 735pt;
+     top: 40pt;
+     height: 495pt;
+  }
+     /* Another static Frame */
+  @frame footer_frame {           
+     -pdf-frame-content: footer_content;
+     left: 60pt; width: 735pt; top: 537pt; height: 40pt;
+     display: block;
+  }
+}
+
+@media print {
+    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+
+body {
+    font: 400 16px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #111;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-feature-settings: "kern" 1;
+    -moz-font-feature-settings: "kern" 1;
+    -o-font-feature-settings: "kern" 1;
+    font-feature-settings: "kern" 1;
+    font-kerning: normal;
+    overflow-wrap: break-word;
+}
+
+table {
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+}
+
+td {
+    padding-top: 6px;
+    padding-left: 2px;
+    border: 1px solid black;
+    vertical-align: middle;
+}
+
+th {
+    padding-top: 6px;
+    padding-left: 2px;
+    border: 1px solid black;
+}
+
+tr {
+    padding: 0px;
+    border: 1px solid black;
+}
+
+
+table.secretTable {
+    width: 100%;
+    border: 0px;
+    border-spacing: 10px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+td.secretTable{
+    border: 0px;
+    padding-top: 6px;
+    padding-left: 0px;
+    padding-right: 4px;
+}
+td.secretTableMid{
+    border: 0px;
+    padding-top: 6px;
+    padding-left: 0px;
+    padding-right: 4px;
+    margin-left:-16px;
+}
+td.secretTableTop{
+    border: 0px;
+    padding-top: 6px;
+    padding-left: 0px;
+    padding-right: 4px;
+    margin-top:-1600px;
+}
+tr.secretTable{
+    border: 0px;
+}
+th.secretTable{
+    border: 0px;
+}
+
+div.imgDiv{
+    text-align: center;
+    height: 175px;
+}
+
+div.attachedFile{
+    text-align: center;
+    width: 1000px;
+}
+
+div.breakLine{
+    width: 470pt;
+    text-wrap: balance;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}

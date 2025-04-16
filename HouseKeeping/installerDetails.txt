@@ -1,0 +1,12 @@
+python -m PyInstaller --onedir -i '.\_core\ThermalDexIcon.ico' --splash='ThermalDexSplash.jpg' --hide-console=hide-early .\ThermalDex.py
+
+version 1.0.0 onwards:
+python -m PyInstaller --onedir -i '.\_core\ThermalDexIcon.ico' --splash='ThermalDexSplash.jpg' --hide-console=hide-early --collect-all reportlab.graphics.barcode .\ThermalDex.py
+
+
+python -m PyInstaller --onedir -i '.\hotplot.ico' --splash='hotplot.jpg' --hide-console=hide-early .\HotPlot.py
+
+
+python -m PyInstaller --onedir --hide-console=hide-early .\DiaryComments.py
+
+python -m PyInstaller --onedir -i '.\Backend\ThermCon_Icon.ico' --hide-console=hide-early .\ThermCon.py
