@@ -903,7 +903,17 @@ class MolDrawer(QWidget):
             #masterLayout = self.mol_overall_layout
         #return masterLayout
 
+    def lazy_compare(self,substring,string):
+        for char in substring:
+            if char in string:
+                continue
+            else:
+                return False
+        return True
+
     def search_database(self, search_text):
+            # This needs to be rewitten as a switch
+
             self.readDatabase = pd.read_csv(defaultDB) #, index_col=0) #, encoding='mbcs')
 
             if search_text == '' or search_text == None:    
@@ -912,6 +922,7 @@ class MolDrawer(QWidget):
 
             elif self.searchTypeSelection.currentText() == 'SMILES':
                 if self.searchSubType.currentText() == 'Exact':
+                    # Note: I should think about 'canonicalising' the SMILES on input to make comparisons easier and prevent duplications. I should think about this more: canon_SMILES = Chem.CanonSmiles(Molecule).
                     searchSMILES = search_text
                     row_index = self.readDatabase.index[self.readDatabase['SMILES'] == searchSMILES].tolist()
                     foundDataFrame = self.readDatabase.iloc[row_index]
@@ -922,17 +933,30 @@ class MolDrawer(QWidget):
                 elif self.searchSubType.currentText() == 'Substructure':
                     try:
                         searchTest = MolFromSmiles(search_text)
-                        #checkifrealbyMW = Descriptors.MolWt(searchTest)
-                        if search_text != '' and search_text != None and searchTest is not None:
-                            smilesList = self.readDatabase['SMILES'].tolist()  #.index.values
-                            #print(smilesList)
+                        if search_text != '' and search_text != None and searchTest != None:
+                            smilesList = self.readDatabase['SMILES'].tolist()  
                             foundList = []
                             for smile in smilesList:
-                                searchStructure = MolFromSmiles(smile)
-                                fullmatchList = Mol.GetSubstructMatches(searchStructure, searchTest)
-                                if len(fullmatchList) > 0:
-                                    print('Substructure Match Found: ' + smile)
+                                if len(smile) < len(search_text):
+                                    continue
+
+                                elif search_text in smile:
                                     foundList += [smile]
+                                    continue
+
+                                elif not self.lazy_compare(search_text,smile):
+                                    continue
+
+                                else:
+                                    try:
+                                        searchStructure = MolFromSmiles(smile)
+                                        fullmatchList = Mol.GetSubstructMatches(searchStructure, searchTest)
+                                        if len(fullmatchList) > 0:
+                                            print('Substructure Match Found: ' + smile)
+                                            foundList += [smile]
+                                    except:
+                                        print(f'Bad SMILES found in Database: {smile}')
+
                             print(foundList)
                             indexList = []
                             for foundMatch in foundList:
@@ -944,8 +968,8 @@ class MolDrawer(QWidget):
                             foundDataFrame.reset_index(drop=True)
                             self.selectedDatabase = foundDataFrame
                             self.show_result(self.selectedDatabase, True)
-                    except:
-                        errorInfo = "Enter Valid SMILES"
+                    except Exception as e:
+                        errorInfo = f"Enter Valid SMILES:\n\nDetailed info: {e}"
                         self.interactiveErrorMessage(errorInfo)
 
             elif self.searchTypeSelection.currentText() == 'Name':
@@ -1221,6 +1245,7 @@ class MolDrawer(QWidget):
         savefile, _ = QFileDialog.getSaveFileName(self, "Export Search Results as CSV", "ThermalDexResults.csv", "CSV Files (*.csv)")
         if savefile:
             Database.to_csv(savefile, index=False)
+
     def createMultiReport(self, Database):
         string_of_report = '''
                             <table>
@@ -1231,13 +1256,25 @@ class MolDrawer(QWidget):
                                         <th>O.R.E.O. Risk 5 to 100 g</th>
                                         <th>O.R.E.O. Risk 100 to 500 g</th>
                                         <th>O.R.E.O. Risk >500 g</th>
-                                        <th>Imact Sensitivity</th>
-                                        <th>Explosive Propragation</th>
-                                        <th>T<sub>D24 (°C)</sub></th>
+                                        <th>No. of High Energy Groups</th>
+                                        <th>No. of Explosive Groups</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                             ''' # removed <th>Name</th> and <th>SMILES</th> for clarity on page
+        
+        string_dsc_report = '''
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Structure</th>
+                                        <th>Imact Sensitivity</th>
+                                        <th>Explosive Propagation</th>
+                                        <th>T<sub>D24 (°C)</sub></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                            ''' 
         
         for index, row in Database.iterrows():
             dictRow = row.to_dict()
@@ -1253,17 +1290,31 @@ class MolDrawer(QWidget):
                                         <td>{repMolecule.oreoTensScale_des}</td>
                                         <td>{repMolecule.oreoHundsScale_des}</td>
                                         <td>{repMolecule.oreoLargeScale_des}</td>
-                                        <td>{repMolecule.IS_des if not pd.isna(repMolecule.IS_des) and not None and not 'None' else 'N/A'}</td>
-                                        <td>{repMolecule.EP_des if not pd.isna(repMolecule.EP_des) and not None and not 'None' else 'N/A'}</td>
-                                        <td>{round(repMolecule.Td24,1) if isinstance(repMolecule.Td24,float) and not pd.isna(repMolecule.Td24) else 'N/A'}</td>
+                                        <td>{repMolecule.HEG}</td>
+                                        <td>{repMolecule.EFG}</td>
                                     </tr>
                                 ''' # removed  <td>{repMolecule.name}</td> and <td>{repMolecule.SMILES}</td> for clarity
+            
+            string_dsc_report += f'''
+                                    <tr>
+                                        <td><img src="{dataURL}" alt="HTML image test" style="object-fit: cover;"/></td>
+                                        <td>{repMolecule.IS_des if not pd.isna(repMolecule.IS_des) and repMolecule.IS_des != None and repMolecule.IS_des != 'None' else 'N/A'}</td>
+                                        <td>{repMolecule.EP_des if not pd.isna(repMolecule.EP_des) and repMolecule.EP_des != None and repMolecule.EP_des != 'None' else 'N/A'}</td>
+                                        <td>{round(repMolecule.Td24,1) if isinstance(repMolecule.Td24,float) and not pd.isna(repMolecule.Td24) else 'N/A'}</td>
+                                    </tr>
+                                ''' 
             
         string_of_report += f'''
                                 </tbody>
                             </table>
                             '''  
-        multiReportCreation(string_of_report)
+                    
+        string_dsc_report += f'''
+                                </tbody>
+                            </table>
+                            '''  
+        multiReportCreation(string_of_report,string_dsc_report)
+
 
     def delCurrentEntry(self, currentResult, Database):
         errorInfo = "Really? Delete this entry? Are you sure?"

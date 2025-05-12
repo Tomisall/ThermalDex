@@ -309,13 +309,13 @@ def mdReportCreation(molecule, dataURL, td24Upper, td24Lower):
     time.sleep(1)
 
     if sys.platform != "darwin":
-        subprocess.run(['ii', "./AssessmentMemos/ThermalHazardAssessmentMemo.pdf"], check=True, shell=True)
+        subprocess.run(['start', "./AssessmentMemos/ThermalHazardAssessmentMemo.pdf"], check=True, shell=True)
 
     else:
         subprocess.run(['open', "./AssessmentMemos/ThermalHazardAssessmentMemo.pdf"], check=True, shell=True)
 
 
-def multiReportCreation(resultsTable):
+def multiReportCreation(resultsTable,dsc_resultstable):
     
     html_content = f'''
         <!DOCTYPE html>
@@ -328,7 +328,11 @@ def multiReportCreation(resultsTable):
         <div style="text-align: center;">
         <h1>Thermal Hazard Assessment Memo</h1>
         </div>
+        <h3>Structure-Only Properties</h3>
         {resultsTable}
+        <div class="pagebreak"></div>
+        <h3>Properties Requiring DSC</h3>
+        {dsc_resultstable}
         <p><small>[1]: <i>Org. Proc. Res. Dev.,</i> 2021, 25, 2, 212-224</small><br>
         <small>[2]: <i>Org. Proc. Res. Dev.,</i> 2020, 24, 1, 67-84</small><br>
         <small>[3]: <i>Angew. Chem. Int. Ed.,</i> 2020, 59, 15798-15802</small></p>
