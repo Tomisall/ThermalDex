@@ -7,6 +7,8 @@ from thermDex.attachedFileManager import *
 from thermDex.Section import Section
 from thermDex.thermDexPlots import *
 from thermDex.thermDexPandasTools import *
+from thermDex.thermDexTextEdit import *
+from thermDex.thermDexTable import *
 import pyperclip
 import configparser
 import sqlite3
@@ -176,6 +178,107 @@ class Td24OverrideWindow(QWidget):
 
         self.close()
 
+class CommentsBox(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Comments Box")
+        self.setGeometry(100, 100, 250, 100)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.text_edit = TextEdit()
+
+        # Shortcuts
+        save_shortcut = QKeySequence(Qt.CTRL + Qt.Key_S)
+        bold_shortcut = QKeySequence(Qt.CTRL + Qt.Key_B)
+        italic_shortcut = QKeySequence(Qt.CTRL + Qt.Key_I)
+        underline_shortcut = QKeySequence(Qt.CTRL + Qt.Key_U)
+        table_shortcut = QKeySequence(Qt.CTRL + Qt.Key_T)
+
+        # Tool bar
+        tool_bar = QToolBar('Writing Tools')
+
+        tb_save = QAction(icon=QIcon('./_core/app_icons/floppy-disk.png'),text='Save',parent=self)
+        tb_save.setShortcut(save_shortcut)
+        tb_save.triggered.connect(self.save_body_html)
+
+        tb_bold = QAction(icon=QIcon('./_core/app_icons/bold.png'),text='Bold',parent=self)
+        tb_bold.setShortcut(bold_shortcut)
+        tb_bold.triggered.connect(self.set_text_bold)
+
+        tb_italic = QAction(icon=QIcon('./_core/app_icons/italic.png'),text='Italic',parent=self)
+        tb_italic.setShortcut(italic_shortcut)
+        tb_italic.triggered.connect(self.set_text_italic)
+
+        tb_underline = QAction(icon=QIcon('./_core/app_icons/underline.png'),text='Underline',parent=self)
+        tb_underline.setShortcut(underline_shortcut)
+        tb_underline.triggered.connect(self.set_text_underline)
+
+        tb_colour_picker = QAction(icon=QIcon('./_core/app_icons/color-wheel.png'),text='Color Picker',parent=self)
+        #tb_colour_picker.setShortcut(xxxxx_shortcut)
+        tb_colour_picker.triggered.connect(self.set_text_colour)
+
+        tb_font_picker = QAction(icon=QIcon('./_core/app_icons/text.png'),text='Font Picker',parent=self)
+        #tb_font_picker.setShortcut(xxxxx_shortcut)
+        tb_font_picker.triggered.connect(self.set_text_font)
+
+        tb_table = QAction(icon=QIcon('./_core/app_icons/table.png'),text='Insert Table',parent=self)
+        tb_table.setStatusTip("Insert table")
+        tb_table.setShortcut(table_shortcut)
+        tb_table.triggered.connect(Table(parent=self.text_edit).show)
+
+        tool_bar.addAction(tb_save)
+        tool_bar.addAction(tb_bold)
+        tool_bar.addAction(tb_italic)
+        tool_bar.addAction(tb_underline)
+        tool_bar.addAction(tb_colour_picker)
+        tool_bar.addAction(tb_font_picker)
+        tool_bar.addAction(tb_table)
+        layout.addWidget(tool_bar)
+        layout.addWidget(self.text_edit)
+
+    def save_body_html(self):
+        output_html = self.text_edit.toHtml()
+        #data_img_html = local_parse_HTML_for_imgs(output_html)
+        #body_cont_html = local_get_body_contents(data_img_html)
+        #Html_no_newlines = body_cont_html.replace('\n', '').replace('\r', '')
+        with open(f"./backend/{self.current_experiment_name}.html", "w") as text_file:
+            text_file.write(output_html)
+    
+    def set_text_bold(self):
+        current_font_weight = self.text_edit.fontWeight()
+        print(current_font_weight)
+        if current_font_weight < 75:
+            self.text_edit.setFontWeight(75)#QFont.Bold)
+        else:
+            self.text_edit.setFontWeight(50)#QFont.Normal)
+
+    def set_text_italic(self):
+        current_font_italic = self.text_edit.fontItalic()
+        print(current_font_italic)
+        if current_font_italic == True:
+            self.text_edit.setFontItalic(False)
+        else:
+            self.text_edit.setFontItalic(True)
+
+    def set_text_underline(self):
+        current_font_underline = self.text_edit.fontUnderline()
+        print(current_font_underline)
+        if current_font_underline == True:
+            self.text_edit.setFontUnderline(False)
+        else:
+            self.text_edit.setFontUnderline(True)
+
+    def set_text_colour(self):
+        dialog = ColorPickerDialog(color=self.text_edit.textColor(), orientation='horizontal')#QColor(0, 0, 0), orientation='horizontal')
+        reply = dialog.exec()
+        if reply == QDialog.Accepted: 
+            color = dialog.getColor() # return type is QColor
+            self.text_edit.setTextColor(color)
+
+    def set_text_font(self):
+        font, valid = QFontDialog.getFont()
+        if valid:
+            self.text_edit.setFont(font)
 
 class MolDrawer(QWidget):
     def __init__(self, parent=None):
@@ -257,6 +360,8 @@ class MolDrawer(QWidget):
         self.overideValue = None
         self.measuredTd24 = QShortcut(QKeySequence('Ctrl+O'), self)
         self.measuredTd24.activated.connect(self.openTd24Override)
+        self.openCommentsBox = QShortcut(QKeySequence('Ctrl+K'), self)
+        self.openCommentsBox.activated.connect(self.openComments)
 
         self.mwLabel = QLabel(self.mwText)
         self.mwLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -1888,6 +1993,14 @@ class MolDrawer(QWidget):
         self.fileWindow.show()
         self.fileWindow.raise_()
         self.fileWindow.activateWindow()
+
+    def openComments(self):
+        self.commentsWindow = CommentsBox()
+        #self.commentsWindow.submitClicked.connect(self.on_sub_window_confirm)
+        #self.commentsWindow.exec_()
+        self.commentsWindow.show()
+        self.commentsWindow.raise_()
+        self.commentsWindow.activateWindow()
 
     def openTd24Override(self):
         self.overrideWindow = Td24OverrideWindow()
