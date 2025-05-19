@@ -74,6 +74,8 @@ class thermalDexMolecule:
     yoshidaMethod: str = 'Pfizer'
     dataFolder: str = ''
     noDSCPeak: str = ''
+    measuredTD24: bool = False
+    empiricalTD24: float = None
 
     def genMol(self):
         RDmol = MolFromSmiles(self.SMILES)

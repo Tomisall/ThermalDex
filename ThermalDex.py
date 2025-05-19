@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QGraphicsView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox
-from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont, QPalette
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QShortcut, QLabel, QLineEdit, QPushButton, QGraphicsView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox, QSizePolicy
+from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont, QPalette, QKeySequence
 from PyQt5.QtCore import Qt, QRegExp, pyqtSignal, QEvent
 from thermDex.thermDexMolecule import *
 from thermDex.thermDexHTMLRep import *
@@ -15,7 +15,7 @@ from contextlib import redirect_stdout
 from os import path, environ
 from shutil import copy2
 
-versionNumber = "1.2.0"
+versionNumber = "1.4.1a"
 
 try:
     import pyi_splash
@@ -87,6 +87,95 @@ class ClickableLineEdit(QLineEdit):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton: self.clicked.emit()
         else: super().mousePressEvent(event)
+
+class RichTextPushButton(QPushButton):
+    def __init__(self, parent=None, text=None):
+        if parent is not None:
+            super().__init__(parent)
+        else:
+            super().__init__()
+        self.__lbl = QLabel(self)
+        if text is not None:
+            self.__lbl.setText(text)
+        self.__lyt = QHBoxLayout()
+        self.__lyt.setContentsMargins(0, 0, 0, 0)
+        self.__lyt.setSpacing(0)
+        self.setLayout(self.__lyt)
+        self.__lbl.setAttribute(Qt.WA_TranslucentBackground)
+        self.__lbl.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.__lbl.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        self.__lbl.setTextFormat(Qt.RichText)
+        self.__lyt.addWidget(self.__lbl)
+        return
+
+    def setText(self, text):
+        self.__lbl.setText(text)
+        self.updateGeometry()
+        return
+
+    def sizeHint(self):
+        s = QPushButton.sizeHint(self)
+        w = self.__lbl.sizeHint()
+        s.setWidth(w.width())
+        s.setHeight(w.height())
+        return s
+
+class Td24OverrideWindow(QWidget):
+    submitClicked = pyqtSignal(bool,float)
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Override Value")
+        self.setGeometry(100, 100, 250, 100)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.measured = False
+        self.td24_measured_float = None
+
+        self.override_value = QLineEdit(self)
+        layout.addWidget(QLabel('Enter Measured T<sub>D24</sub> value:'))
+        layout.addWidget(self.override_value)
+        self.overide_button = RichTextPushButton()
+        self.overide_button.setText('&nbsp;&nbsp;Record T<sub>D24</sub>')
+        self.overide_button.setStyleSheet("text-align:center;")
+        self.overide_button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        button_centre = QHBoxLayout()
+        button_centre.addWidget(self.overide_button)
+        self.overide_button.clicked.connect(self.override_button_click)
+        layout.addLayout(button_centre)
+
+    def interactiveErrorMessage(self, errorInfo):
+        self.interactMsg = QMessageBox()
+        self.interactMsg.setIcon(QMessageBox.Information)
+        self.interactMsg.setText("Action Needed")
+        self.interactMsg.setInformativeText(errorInfo)
+        self.interactMsg.setWindowTitle("ThermalDex - Info Box")
+        self.interactMsg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        returnValue = self.interactMsg.exec()
+        return returnValue
+
+    def open_window(self):
+        self.newWindow = Td24OverrideWindow(self)
+        self.newWindow.show()
+
+    def override_button_click(self):
+        try:
+            print(f'{self.override_value.text()=}')
+            float_of_empirical_td24 = float(self.override_value.text())
+            print(f'{float_of_empirical_td24=}')
+            self.measured = True
+            self.td24_measured_float = float_of_empirical_td24
+            self.submitClicked.emit(self.measured,self.td24_measured_float)
+        except Exception as e:
+            errorInfo = f"Enter Valid Number Please:\n\nDetailed info: {e}"
+            self.interactiveErrorMessage(errorInfo)
+
+        self.close()
+
 
 class MolDrawer(QWidget):
     def __init__(self, parent=None):
@@ -163,6 +252,11 @@ class MolDrawer(QWidget):
         self.ISText = 'Yoshida Impact Sensitivity: '
         self.EPText = 'Yoshida Explosive Propagation: '
         self.Td24Text = 'T<sub>D24</sub>: '
+
+        self.overrideOn = False
+        self.overideValue = None
+        self.measuredTd24 = QShortcut(QKeySequence('Ctrl+O'), self)
+        self.measuredTd24.activated.connect(self.openTd24Override)
 
         self.mwLabel = QLabel(self.mwText)
         self.mwLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -1750,15 +1844,27 @@ class MolDrawer(QWidget):
             epStr = ''
         self.EPLabel.setText('Yoshida Explosive Propagation: ' + epStr + readMolecule.EP_des)
         try:
-            d24Str = "{:.1f}".format(readMolecule.Td24)
-            if int(ambertd24limit) >= readMolecule.Td24 > int(redtd24limit):
-                self.Td24Label.setText(f"T<sub>D24</sub>: <b style='color: orange;'> {d24Str} °C</b>")
-            elif readMolecule.Td24 <= int(redtd24limit):
-                self.Td24Label.setText(f"<h3 style='color: red;'>T<sub>D24</sub>: {d24Str} °C</h3>")
-                self.approval_needed.show()
-                self.lhs_title.setText("<h3>Title</h3>")
+            if readMolecule.measuredTD24:
+                d24Str = "{:.1f}".format(readMolecule.empiricalTD24)
+                if int(ambertd24limit) >= readMolecule.empiricalTD24 > int(redtd24limit):
+                    self.Td24Label.setText(f"T<sub>D24</sub>: <b style='color: orange;'> {d24Str} °C</b> (measured)")
+                elif readMolecule.empiricalTD24 <= int(redtd24limit):
+                    self.Td24Label.setText(f"<h3 style='color: red;'>T<sub>D24</sub>: {d24Str} °C</h3> (measured)")
+                    self.approval_needed.show()
+                    self.lhs_title.setText("<h3>Title</h3>")
+                else:
+                    self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b> (measured)')  
+
             else:
-                self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b>')       
+                d24Str = "{:.1f}".format(readMolecule.Td24)
+                if int(ambertd24limit) >= readMolecule.Td24 > int(redtd24limit):
+                    self.Td24Label.setText(f"T<sub>D24</sub>: <b style='color: orange;'> {d24Str} °C</b>")
+                elif readMolecule.Td24 <= int(redtd24limit):
+                    self.Td24Label.setText(f"<h3 style='color: red;'>T<sub>D24</sub>: {d24Str} °C</h3>")
+                    self.approval_needed.show()
+                    self.lhs_title.setText("<h3>Title</h3>")
+                else:
+                    self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b>')       
         except:
             pass
         self.tab_widget.setCurrentWidget(self.molecule_tab)   #0) #self.tab_widget.findChild(QWidget, "Add"))
@@ -1782,6 +1888,21 @@ class MolDrawer(QWidget):
         self.fileWindow.show()
         self.fileWindow.raise_()
         self.fileWindow.activateWindow()
+
+    def openTd24Override(self):
+        self.overrideWindow = Td24OverrideWindow()
+        self.overrideWindow.submitClicked.connect(self.on_sub_window_confirm)
+        #self.overrideWindow.exec_()
+        self.overrideWindow.show()
+        self.overrideWindow.raise_()
+        self.overrideWindow.activateWindow()
+
+    def on_sub_window_confirm(self,onBool,onVal):
+        self.overrideOn = onBool
+        self.overideValue = onVal
+        print(f'{onVal=}')
+        self.render_molecule()
+        
 
     def findFolder(self, database):
         try:
@@ -1868,6 +1989,8 @@ class MolDrawer(QWidget):
         self.attachedFilesLabel.hide()
         self.filesCount.hide()
         self.attach_button.hide()
+        self.overrideOn = False
+        self.overrideValue = None
 
     def resetToDefaultState(self):
         self.clearTheCalcdValues()
@@ -2051,9 +2174,12 @@ class MolDrawer(QWidget):
 
         dataFolder = self.findFolder(defaultDB)
         noDSCPeak = self.get_dsc_checkstate()
+        measuredTD24 = self.overrideOn
+        empiricalTD24 = self.overideValue
+        print(f'{measuredTD24=}\n{empiricalTD24=}\n')
 
         # Create an RDKit molecule from the SMILES string
-        addedMolecule = thermalDexMolecule(SMILES=smiles, name=name, mp=mp, mpEnd=mpEnd, Q_dsc=Qdsc, Qunits=QUnits, onsetT=TE, initT=Tinit, proj=proj, hammerDrop=hammerDrop, friction=friction, dataFolder=dataFolder, yoshidaMethod=yoshidaMethod, noDSCPeak=noDSCPeak)
+        addedMolecule = thermalDexMolecule(SMILES=smiles, name=name, mp=mp, mpEnd=mpEnd, Q_dsc=Qdsc, Qunits=QUnits, onsetT=TE, initT=Tinit, proj=proj, hammerDrop=hammerDrop, friction=friction, dataFolder=dataFolder, yoshidaMethod=yoshidaMethod, noDSCPeak=noDSCPeak, measuredTD24=measuredTD24, empiricalTD24=empiricalTD24)
         return addedMolecule
     
     def check_if_oreos_need_approval(self, molecule):
@@ -2164,7 +2290,7 @@ class MolDrawer(QWidget):
                 self.ISLabel.setText('Yoshida Impact Sensitivity: ' + addedMolecule.isStr + addedMolecule.IS_des)
             if addedMolecule.epStr != None:
                 self.EPLabel.setText('Yoshida Explosive Propagation: ' + addedMolecule.epStr + addedMolecule.EP_des)
-            if addedMolecule.Td24 != '' and addedMolecule.Td24 != 'nan' and addedMolecule.Td24 != None:
+            if addedMolecule.Td24 != '' and addedMolecule.Td24 != 'nan' and addedMolecule.Td24 != None and not addedMolecule.measuredTD24:
                 d24Str = "{:.1f}".format(addedMolecule.Td24)
                 if int(ambertd24limit) >= addedMolecule.Td24 > int(redtd24limit):
                     self.Td24Label.setText(f"T<sub>D24</sub>: <b style='color: orange;'> {d24Str} °C</b>")
@@ -2176,6 +2302,19 @@ class MolDrawer(QWidget):
                     self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b>')
                     self.lhs_title.setText("Title")
                 
+            elif addedMolecule.measuredTD24:
+                print(f'{addedMolecule.empiricalTD24=}')
+                d24Str = "{:.1f}".format(addedMolecule.empiricalTD24)
+                if int(ambertd24limit) >= addedMolecule.empiricalTD24 > int(redtd24limit):
+                    self.Td24Label.setText(f"T<sub>D24</sub>: <b style='color: orange;'> {d24Str} °C</b> (measured)")
+                elif addedMolecule.empiricalTD24 <= int(redtd24limit):
+                    self.Td24Label.setText(f"<h3 style='color: red;'>T<sub>D24</sub>: {d24Str} °C</h3> (measured)")
+                    self.approval_needed.show()
+                    self.lhs_title.setText("<h3>Title</h3>")
+                else:
+                    self.Td24Label.setText('T<sub>D24</sub>: <b>' + d24Str + ' °C</b> (measured)')
+                    self.lhs_title.setText("Title")
+
             if addedMolecule.noDSCPeak == '' and addedMolecule.onsetT != 'nan' and addedMolecule.onsetT != '' and addedMolecule.onsetT != None and addedMolecule.onsetT <= 24.99:
                 self.error_message = QLabel('Sub-Ambient Onset Temperature? Are you sure? Yoshida values will not be accurate.')
                 layout.addWidget(self.error_message)
@@ -2224,28 +2363,28 @@ class MolDrawer(QWidget):
 
 
 if __name__ == '__main__':
-    with open('./_core/ThermalDex.log', 'w', encoding='utf-8') as logFile:
-        with redirect_stdout(logFile):
-            defaultDB, highEnergyGroups, expEnergyGroups, yoshidaMethod, qdscUnits, ambertd24limit, redtd24limit, oreohazardlimit, oreohazardwarningscale = altImportConfig()
-            font = QFont("Segoe UI")
-            font.setPixelSize(11)
-            app = QApplication(sys.argv)
-            app.setWindowIcon(QIcon('.\\_core\\ThermalDexIcon.ico'))
-            app.setFont(font, "QLabel")
-            app.setFont(font, "QLineEdit")
-            app.setFont(font, "QComboBox")
-            app.setFont(font, "QTableWidget")
-            app.setFont(font, "QTableWidget.horizontalHeader")
-            app.setFont(font, "QTabWidget")
-            app.setFont(font, "QWidget")
-            app.setFont(font, "QPushButton")
-            screen = app.primaryScreen()
-            dpi = screen.physicalDotsPerInch()
-            print(f'Screen DPI: {dpi}')
-            window = MolDrawer()
-            #window.layout().setSizeConstraint(QLayout.SetFixedSize
-            #window.showMaximized()
-            window.show()
-            window.raise_()
-            window.activateWindow()
-            sys.exit(app.exec_())
+    #with open('./_core/ThermalDex.log', 'w', encoding='utf-8') as logFile:
+     #   with redirect_stdout(logFile):
+    defaultDB, highEnergyGroups, expEnergyGroups, yoshidaMethod, qdscUnits, ambertd24limit, redtd24limit, oreohazardlimit, oreohazardwarningscale = altImportConfig()
+    font = QFont("Segoe UI")
+    font.setPixelSize(11)
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('.\\_core\\ThermalDexIcon.ico'))
+    app.setFont(font, "QLabel")
+    app.setFont(font, "QLineEdit")
+    app.setFont(font, "QComboBox")
+    app.setFont(font, "QTableWidget")
+    app.setFont(font, "QTableWidget.horizontalHeader")
+    app.setFont(font, "QTabWidget")
+    app.setFont(font, "QWidget")
+    app.setFont(font, "QPushButton")
+    screen = app.primaryScreen()
+    dpi = screen.physicalDotsPerInch()
+    print(f'Screen DPI: {dpi}')
+    window = MolDrawer()
+    #window.layout().setSizeConstraint(QLayout.SetFixedSize
+    #window.showMaximized()
+    window.show()
+    window.raise_()
+    window.activateWindow()
+    sys.exit(app.exec_())
