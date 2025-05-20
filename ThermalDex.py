@@ -179,6 +179,8 @@ class Td24OverrideWindow(QWidget):
         self.close()
 
 class CommentsBox(QWidget):
+    submitClicked = pyqtSignal()
+
     def __init__(self, comments_location):
         super().__init__()
         self.setWindowTitle("Comments Box")
@@ -249,6 +251,8 @@ class CommentsBox(QWidget):
         #Html_no_newlines = body_cont_html.replace('\n', '').replace('\r', '')
         with open(f'{self.comments_location}/comments.html', "w") as text_file:
             text_file.write(output_html)
+        
+        self.submitClicked.emit()
     
     def set_text_bold(self):
         current_font_weight = self.text_edit.fontWeight()
@@ -1934,8 +1938,9 @@ class MolDrawer(QWidget):
         else:
             self.fricSelection.setCurrentIndex(0)
 
-        fileCounter = self.countFiles(defaultDB)
-        self.filesCount.setText(f"{str(fileCounter)} Attached Files")
+        #fileCounter = self.countFiles(defaultDB)
+        #self.filesCount.setText(f"{str(fileCounter)} Attached Files")
+        self.fileCounterUpdate()
         self.attachedFilesLabel.show()
         self.filesCount.show()
         self.attach_button.show()
@@ -2007,11 +2012,16 @@ class MolDrawer(QWidget):
             self.interactiveErrorMessage(errorInfo)
         else:
             self.commentsWindow = CommentsBox(comments_location=comment_location)
-            #self.commentsWindow.submitClicked.connect(self.on_sub_window_confirm)
+            self.commentsWindow.submitClicked.connect(self.fileCounterUpdate)
             #self.commentsWindow.exec_()
             self.commentsWindow.show()
             self.commentsWindow.raise_()
             self.commentsWindow.activateWindow()
+
+    def fileCounterUpdate(self) -> None:
+        fileCounter = self.countFiles(defaultDB)
+        self.filesCount.setText(f"{str(fileCounter)} Attached Files")
+        return None
 
     def openTd24Override(self):
         self.overrideWindow = Td24OverrideWindow()
