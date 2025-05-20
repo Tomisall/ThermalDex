@@ -179,13 +179,19 @@ class Td24OverrideWindow(QWidget):
         self.close()
 
 class CommentsBox(QWidget):
-    def __init__(self):
+    def __init__(self, comments_location):
         super().__init__()
         self.setWindowTitle("Comments Box")
         self.setGeometry(100, 100, 250, 100)
+        self.comments_location = comments_location
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.text_edit = TextEdit()
+        if os.path.isfile(f'{comments_location}/comments.html'):
+            with open(f'{comments_location}/comments.html') as file:
+                self.text_edit.setHtml(file.read())
+
+        
 
         # Shortcuts
         save_shortcut = QKeySequence(Qt.CTRL + Qt.Key_S)
@@ -241,7 +247,7 @@ class CommentsBox(QWidget):
         #data_img_html = local_parse_HTML_for_imgs(output_html)
         #body_cont_html = local_get_body_contents(data_img_html)
         #Html_no_newlines = body_cont_html.replace('\n', '').replace('\r', '')
-        with open(f"./backend/{self.current_experiment_name}.html", "w") as text_file:
+        with open(f'{self.comments_location}/comments.html', "w") as text_file:
             text_file.write(output_html)
     
     def set_text_bold(self):
@@ -1995,12 +2001,17 @@ class MolDrawer(QWidget):
         self.fileWindow.activateWindow()
 
     def openComments(self):
-        self.commentsWindow = CommentsBox()
-        #self.commentsWindow.submitClicked.connect(self.on_sub_window_confirm)
-        #self.commentsWindow.exec_()
-        self.commentsWindow.show()
-        self.commentsWindow.raise_()
-        self.commentsWindow.activateWindow()
+        comment_location = self.set_comment_location(database=defaultDB)
+        if comment_location == None:
+            errorInfo = f"Please Enter A Valid SMILES Before Commenting."
+            self.interactiveErrorMessage(errorInfo)
+        else:
+            self.commentsWindow = CommentsBox(comments_location=comment_location)
+            #self.commentsWindow.submitClicked.connect(self.on_sub_window_confirm)
+            #self.commentsWindow.exec_()
+            self.commentsWindow.show()
+            self.commentsWindow.raise_()
+            self.commentsWindow.activateWindow()
 
     def openTd24Override(self):
         self.overrideWindow = Td24OverrideWindow()
@@ -2015,9 +2026,21 @@ class MolDrawer(QWidget):
         self.overideValue = onVal
         print(f'{onVal=}')
         self.render_molecule()
-        
 
-    def findFolder(self, database):
+    def set_comment_location(self, database) -> str | None:
+        folder = self.findFolder(database=database)
+        if folder != '' and folder != 'nan':
+            return folder
+        
+        else:
+            newMolecule = self.render_molecule()
+            if newMolecule != None:
+                newfolder = self.findFolder(database=database)
+                return newfolder
+            else:
+                return None
+
+    def findFolder(self, database) -> str:
         try:
             storedData = pd.read_csv(database)
             row_index = storedData.index[storedData['SMILES'] == self.smiles_input.text()].tolist()
@@ -2354,7 +2377,7 @@ class MolDrawer(QWidget):
         display.setScene(scene)
         molecule.molPixmap = None
 
-    def render_molecule(self):
+    def render_molecule(self) -> thermalDexMolecule | None:
         layout = self.layout()
         if self.error_flag is not None:
             self.error_message.setText('')
@@ -2462,6 +2485,7 @@ class MolDrawer(QWidget):
             #layout = self.layout()
             layout.addWidget(self.error_message)
             self.error_flag = 100
+            return None
 
     def recal_db(self):
         db_as_df = pd.read_csv(defaultDB)
