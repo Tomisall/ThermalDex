@@ -105,6 +105,18 @@ def mdReportCreation(molecule, dataURL, td24Upper, td24Lower):
 <img src="{pageDataURL}" alt="{file}" style="object-fit: cover;"/>
 </div>
 '''
+        elif file.endswith('.html'):
+            additionalData += f'<h3>Comments:</h3>'
+            with open(f'{molecule.dataFolder}/{file}') as comments:
+                lines = comments.readlines()
+                for i,line in enumerate(lines):
+                    if i <= 3:
+                        print(f'Skipped: {line}')
+                        continue
+                    else:
+                        additionalData += line
+                        print(line)
+        
         else:
             print(f'bad {file}')
 

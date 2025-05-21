@@ -95,9 +95,7 @@ def create_pdf(Name, results, image_path):
     c.setFont(memoFont, 11)
     c.drawString(50, startOfText-120, "Results:")
 
-    # Add the actual results from your assessment
-    # for i, (key, value) in enumerate(results.items()):
-    #    c.drawString(70, 315 - i * 20, f"{key}: {value}")
+    # Rresults from  assessment
     c.drawString(70, startOfText-140, "High Energy Groups =  " + str(results["HEG"]) + " "  + ", ".join(results["HEG_list"]))
     c.drawString(70, startOfText-160, "Explosive  Groups =  " + str(results["EFG"]) + " " + ", ".join(results["EFG_list"]))
 
@@ -204,18 +202,9 @@ def create_pdf(Name, results, image_path):
     oreosTable.wrapOn(c, 0, 0)
     oreosTable.drawOn(c, 160, startOfText-290)
 
-    # Add interpretation section
+    # Interpretation section
     c.drawString(50, startOfText-325, "Interpretation:")
     c.setFont(memoFont, 11)
-    # Add your interpretation text
-    #interpretation_text = interpretation
-    # interpPara = Paragraph(interpretation_text, my_Style)
-    # interpPara.drawOn(c, 70, 480)
-
-    # i = startOfText-345
-    # for line in interpretation_text:
-    #    c.drawString(70, i, line)
-    #    i -= 20
 
     textobject = c.beginText()
     textobject.setTextOrigin(70, startOfText-345)
@@ -231,7 +220,6 @@ def create_pdf(Name, results, image_path):
     textobject.textOut(" result gives the maximum safe operation temperature.")
     #textobject.textOut(" °C")
     c.drawText(textobject)
-
 
     # Add footer with disclaimer
     c.setFont(memoFont, 8)
