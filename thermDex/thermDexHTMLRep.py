@@ -140,7 +140,7 @@ def mdReportCreation(molecule, dataURL, td24Upper, td24Lower):
 
 
     blankCellCount = 0 
-    if molecule.Td24 != None:
+    if molecule.Td24 != None and molecule.empiricalTD24 == None:
          if td24Upper >= molecule.Td24 > td24Lower:
              Td24Formated = f"<b style='color: orange;'>{'{:.1f}'.format(molecule.Td24)} °C</b>" 
              seekApproval = ''
@@ -152,6 +152,20 @@ def mdReportCreation(molecule, dataURL, td24Upper, td24Lower):
              seekApproval = ''
          TD24row = f'<td class="secretTable">T<sub>D24</sub> = {Td24Formated}</td>'
          interpTd24 = f"T<sub>D24</sub> is the temperature at which the time to the maximum rate of a runaway reaction is 24&nbsp;h.<sup>3</sup>  A reaction where the time to maximum rate is &#8805; 24&nbsp;h is highly unlikely to develop a thermal runaway. As such a reaction temperature of <b>{Td24Formated} or below</b> would be considered appropriate for this compound.{seekApproval}"
+
+    elif molecule.empiricalTD24 != None: 
+         if td24Upper >= molecule.empiricalTD24 > td24Lower:
+             Td24Formated = f"<b style='color: orange;'>{'{:.1f}'.format(molecule.empiricalTD24)} °C</b>" 
+             seekApproval = ''
+         elif molecule.empiricalTD24 <= td24Lower:
+             Td24Formated = f"<b style='color: red;'>{'{:.1f}'.format(molecule.empiricalTD24)} °C</b>" 
+             seekApproval = 'Given the low T<sub>D24</sub> value for this molecule, approval must be sought internally before it is used.'
+         else:
+             Td24Formated = "{:.1f}".format(molecule.empiricalTD24) + " °C"
+             seekApproval = ''
+         TD24row = f'<td class="secretTable">T<sub>D24</sub> = {Td24Formated} (measured)</td>'
+         interpTd24 = f"T<sub>D24</sub> is the temperature at which the time to the maximum rate of a runaway reaction is 24&nbsp;h.<sup>3</sup>  A reaction where the time to maximum rate is &#8805; 24&nbsp;h is highly unlikely to develop a thermal runaway. As such a reaction temperature of <b>{Td24Formated} or below</b> would be considered appropriate for this compound.{seekApproval}"
+     
     else:
          Td24Formated = ""
          TD24row = ""
