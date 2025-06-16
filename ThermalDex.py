@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QShortcut, QLabel, QLineEdit, QPushButton, QGraphicsView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QShortcut, QLabel, QLineEdit, QPushButton, QGraphicsView, QAbstractItemView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox, QSizePolicy
 from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont, QPalette, QKeySequence
 from PyQt5.QtCore import Qt, QRegExp, pyqtSignal, QEvent
 from thermDex.thermDexMolecule import *
@@ -124,6 +124,112 @@ class RichTextPushButton(QPushButton):
         s.setWidth(w.width())
         s.setHeight(w.height())
         return s
+
+class PandasModelEditable(QAbstractTableModel):
+    def __init__(self, data, parent=None):
+        QAbstractTableModel.__init__(self, parent)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return len(self._data.values)
+
+    def columnCount(self, parent=None):
+        return self._data.columns.size
+
+    def data(self, index, role=Qt.DisplayRole):
+        if index.isValid():
+            if role == Qt.DisplayRole or role == Qt.EditRole:
+                return str(self._data.iloc[index.row(), index.column()])
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role != Qt.DisplayRole:
+            return None
+        if orientation == Qt.Horizontal:
+            try:
+                return '%s' % str(self._data.columns.tolist()[section])
+            except (IndexError,):
+                return str()
+        elif orientation == Qt.Vertical:
+            try:
+                return '%s' % str(self._data.index.tolist()[section])
+            except (IndexError,):
+                return str()
+
+    def flags(self, index):
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | \
+               Qt.ItemIsEditable
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if index.isValid():
+            self._data.iloc[index.row(), index.column()] = value
+            if self.data(index, Qt.DisplayRole) == value:
+                self.dataChanged.emit(index, index)
+                return True
+        return False
+    
+class BulkImportAssistent(QWidget):
+    submitClicked = pyqtSignal(pd.DataFrame,bool)
+
+    def __init__(self, pandas_dataframe):
+        super().__init__()
+        self.setWindowTitle("Override Value")
+        self.setGeometry(100, 100, 450, 200)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.df = pandas_dataframe
+
+        self.import_check = QTableView()
+        #font = QtGui.QFont()
+        #font.setPointSize(7)
+        self.import_check.setFont(font)
+        self.import_check.setFrameShape(QFrame.StyledPanel)
+        self.import_check.setFrameShadow(QFrame.Sunken)
+        self.import_check.setEditTriggers(QAbstractItemView.AllEditTriggers)
+        self.import_check.setShowGrid(True)
+        self.import_check.setSortingEnabled(True)
+        self.import_check.setCornerButtonEnabled(True)
+        self.import_check.setObjectName("import_check")
+
+        model = PandasModelEditable(pandas_dataframe)
+        self.import_check.setModel(model)
+        layout.addWidget(self.import_check)
+
+        #self.overide_button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        button_centre = QHBoxLayout()
+        self.run_button = QPushButton('Run')
+        self.run_unsafe_button = QPushButton('Run without Warnings')
+        button_centre.addWidget(self.run_button)
+        button_centre.addWidget(self.run_unsafe_button)
+        self.run_button.clicked.connect(self.run_button_click)
+        self.run_unsafe_button.clicked.connect(self.unsafe_button_click)
+        layout.addLayout(button_centre)
+
+    def interactiveErrorMessage(self, errorInfo):
+        self.interactMsg = QMessageBox()
+        self.interactMsg.setIcon(QMessageBox.Information)
+        self.interactMsg.setText("Action Needed")
+        self.interactMsg.setInformativeText(errorInfo)
+        self.interactMsg.setWindowTitle("ThermalDex - Info Box")
+        self.interactMsg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        returnValue = self.interactMsg.exec()
+        return returnValue
+
+    def open_window(self):
+        self.newWindow = Td24OverrideWindow(self)
+        self.newWindow.show()
+
+    def run_button_click(self):
+        return_df = self.df.copy()
+        return_df = return_df.drop(['Valid SMILES'], axis=1)
+        #return(return_df,True)
+        self.submitClicked.emit(return_df,True)
+    
+    def unsafe_button_click(self):
+        return_df = self.df.copy()
+        return_df = return_df.drop(['Valid SMILES'], axis=1)
+        #return(return_df,False)
+        self.submitClicked.emit(return_df,False)
+
 
 class Td24OverrideWindow(QWidget):
     submitClicked = pyqtSignal(bool,float)
@@ -1602,48 +1708,68 @@ class MolDrawer(QWidget):
         self.searchSubType.clear()
         self.searchSubType.addItems(self.listOfSearchTypes[subIndex])
 
+    def import_override_warning(self) -> bool:
+        overrideDialouge = QMessageBox()
+        overrideDialouge.setIcon(QMessageBox.Information)
+        overrideDialouge.setWindowTitle("ThermalDex - Info Box")
+        overrideDialouge.setText("Run With Override Check?")
+        overrideDialouge.setInformativeText("By default ThermalDex checks each compound to ensure existing compounds in the database are not overwritten. This may results in multiple warning dialouges. Would you like to leave these checks in place? (recommend 'yes' unless you have a reason not to).")
+        overrideDialouge.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        returnValue = overrideDialouge.exec()
+        if returnValue == QMessageBox.Yes:
+            import_override_protection = True
+        else:
+            import_override_protection = False
+        return import_override_protection
+    
+    def load_csv_with_validation(self, import_file: str) -> pd.DataFrame:
+        importedDB = pd.read_csv(import_file)
+        validatedDB = importedDB.copy()
+        invalid_SMILES = []
+        for index, row in importedDB.iterrows():
+            dictRow = row.to_dict()
+            readMolecule = thermalDexMolecule(**dictRow)
+            readMolecule.genMol()
+            invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
+        validatedDB['Valid SMILES'] = invalid_SMILES
+        validatedDB.map(lambda x: 'Yes' if x == None else 'No')
+        self.openImportAssistent(validatedDB)
+        invalid_only_SMILES = filter(None, invalid_SMILES)
+        print(f'The following SMILES were found to be invalid: {invalid_only_SMILES}')
+        return importedDB
+    
+    def run_import(self,importedDB: pd.DataFrame, import_override_protection: bool):
+        imported_df = pd.DataFrame()
+        for index, row in importedDB.iterrows():
+            dictRow = row.to_dict()
+            readMolecule = thermalDexMolecule(**dictRow)
+            readMolecule.genMol()
+            self.checkIfSMILESAreValid(readMolecule)
+            if readMolecule.mol is not None:
+                # Calculate Core Properties
+                self.genCoreValuesFromMol(readMolecule)
+            sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
+            imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
+        #self.openImportAssistent(sql_data)
+        self.sqlite_db_implementation(sql_data)
+        self.import_qmsg = QMessageBox()
+        self.import_qmsg.setIcon(QMessageBox.Information)
+        self.import_qmsg.setWindowTitle("ThermalDex - Info Box")
+        self.import_qmsg.setText("Import Complete")
+        self.import_qmsg.setInformativeText("Import has completed. Do you want to generate a summary pdf?")
+        self.import_qmsg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        returnValue = self.import_qmsg.exec()
+        if returnValue == QMessageBox.Yes:
+            self.createMultiReport(imported_df)
+
     def import_external_database(self):
         options = QFileDialog.Options()
         import_file, _ = QFileDialog.getOpenFileName(self, "Select Database to Import:", "", "CSV Files (*.csv)", options=options)
-        imported_df = pd.DataFrame()
         if import_file:
-                  overrideDialouge = QMessageBox()
-                  overrideDialouge.setIcon(QMessageBox.Information)
-                  overrideDialouge.setWindowTitle("ThermalDex - Info Box")
-                  overrideDialouge.setText("Run With Override Check?")
-                  overrideDialouge.setInformativeText("By default ThermalDex checks each compound to ensure existing compounds in the database are not overwritten. This may results in multiple warning dialouges. Would you like to leave these checks in place? (recommend 'yes' unless you have a reason not to).")
-                  overrideDialouge.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                  returnValue = overrideDialouge.exec()
-                  if returnValue == QMessageBox.Yes:
-                      import_override_protection = True
-                  else:
-                      import_override_protection = False
-                  importedDB = pd.read_csv(import_file)
-                  invalid_SMILES = []
-                  for index, row in importedDB.iterrows():
-                    dictRow = row.to_dict()
-                    readMolecule = thermalDexMolecule(**dictRow)
-                    readMolecule.genMol()
-                    invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
-                    if readMolecule.mol is not None:
-                        # Calculate Core Properties
-                        self.genCoreValuesFromMol(readMolecule)
-                    sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
-                    imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
-
-                  invalid_SMILES = filter(None, invalid_SMILES)
-                  print(f'The following SMILES were found to be invalid: {invalid_SMILES}')
-
-                  self.sqlite_db_implementation(sql_data)
-                  self.import_qmsg = QMessageBox()
-                  self.import_qmsg.setIcon(QMessageBox.Information)
-                  self.import_qmsg.setWindowTitle("ThermalDex - Info Box")
-                  self.import_qmsg.setText("Import Complete")
-                  self.import_qmsg.setInformativeText("Import has completed. Do you want to generate a summary pdf?")
-                  self.import_qmsg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                  returnValue = self.import_qmsg.exec()
-                  if returnValue == QMessageBox.Yes:
-                      self.createMultiReport(imported_df)
+            #import_override_protection = self.import_override_warning()
+            importedDB = self.load_csv_with_validation(import_file = import_file)
+            #self.run_import(importedDB = importedDB, import_override_protection = import_override_protection)
+            return importedDB
 
 
     def text_search_type(self, search_column, search_text):
@@ -2078,6 +2204,22 @@ class MolDrawer(QWidget):
         except:
             return ''
      
+    def openImportAssistent(self, df):
+        #comment_location = self.set_comment_location(database=defaultDB)
+        #if comment_location == None:
+        #    errorInfo = f"Please Enter A Valid SMILES Before Commenting."
+        #    self.interactiveErrorMessage(errorInfo)
+        #else:
+        #df = df.copy()
+        #df = df.reset_index()
+        #df = df.rename({'index':'SMILES'})
+        self.import_assist = BulkImportAssistent(pandas_dataframe=df)
+        self.import_assist.submitClicked.connect(self.run_import)
+        #self.commentsWindow.submitClicked.connect(self.fileCounterUpdate)
+        #self.commentsWindow.exec_()
+        self.import_assist.show()
+        self.import_assist.raise_()
+        self.import_assist.activateWindow()
 
     def countFiles(self, database):
         try:
