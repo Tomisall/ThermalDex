@@ -197,6 +197,9 @@ class CommentsBox(QWidget):
 
         # Shortcuts
         save_shortcut = QKeySequence(Qt.CTRL + Qt.Key_S)
+
+
+
         bold_shortcut = QKeySequence(Qt.CTRL + Qt.Key_B)
         italic_shortcut = QKeySequence(Qt.CTRL + Qt.Key_I)
         underline_shortcut = QKeySequence(Qt.CTRL + Qt.Key_U)
@@ -1604,17 +1607,32 @@ class MolDrawer(QWidget):
         import_file, _ = QFileDialog.getOpenFileName(self, "Select Database to Import:", "", "CSV Files (*.csv)", options=options)
         imported_df = pd.DataFrame()
         if import_file:
+                  overrideDialouge = QMessageBox()
+                  overrideDialouge.setIcon(QMessageBox.Information)
+                  overrideDialouge.setWindowTitle("ThermalDex - Info Box")
+                  overrideDialouge.setText("Run With Override Check?")
+                  overrideDialouge.setInformativeText("By default ThermalDex checks each compound to ensure existing compounds in the database are not overwritten. This may results in multiple warning dialouges. Would you like to leave these checks in place? (recommend 'yes' unless you have a reason not to).")
+                  overrideDialouge.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                  returnValue = overrideDialouge.exec()
+                  if returnValue == QMessageBox.Yes:
+                      import_override_protection = True
+                  else:
+                      import_override_protection = False
                   importedDB = pd.read_csv(import_file)
+                  invalid_SMILES = []
                   for index, row in importedDB.iterrows():
                     dictRow = row.to_dict()
                     readMolecule = thermalDexMolecule(**dictRow)
                     readMolecule.genMol()
-                    self.checkIfSMILESAreValid(readMolecule)
+                    invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
                     if readMolecule.mol is not None:
                         # Calculate Core Properties
                         self.genCoreValuesFromMol(readMolecule)
-                    sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = True)
+                    sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
                     imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
+
+                  invalid_SMILES = filter(None, invalid_SMILES)
+                  print(f'The following SMILES were found to be invalid: {invalid_SMILES}')
 
                   self.sqlite_db_implementation(sql_data)
                   self.import_qmsg = QMessageBox()
@@ -2375,6 +2393,13 @@ class MolDrawer(QWidget):
     def checkIfSMILESAreValid(self, molecule):
         if molecule.SMILES != '' and molecule.SMILES is not None:
             molecule.mol = MolFromSmiles(molecule.SMILES)
+            try:
+                realtest = molecule.molToBytes()
+            except:
+                molecule.mol = None
+                self.showErrorMessage(f'Invalid SMILES detected: {molecule.SMILES}')
+                print(f'Invalid SMILES: {molecule.SMILES}')
+                return molecule.SMILES
 
         else:
             molecule.mol = None
