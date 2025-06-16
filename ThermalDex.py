@@ -168,6 +168,7 @@ class PandasModelEditable(QAbstractTableModel):
         return False
     
 class BulkImportAssistent(QWidget):
+    checkClicked = pyqtSignal(pd.DataFrame,QTableView)
     submitClicked = pyqtSignal(pd.DataFrame,bool)
 
     def __init__(self, pandas_dataframe):
@@ -177,6 +178,12 @@ class BulkImportAssistent(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.df = pandas_dataframe
+
+        self.import_summary_text = QLabel(f'Import includes {len(pandas_dataframe)} compounds.')
+        layout.addWidget(self.import_summary_text)
+        self.check_button = QPushButton('Validate SMILES')
+        layout.addWidget(self.check_button)
+        self.check_button.clicked.connect(self.check_button_click)
 
         self.import_check = QTableView()
         #font = QtGui.QFont()
@@ -217,6 +224,12 @@ class BulkImportAssistent(QWidget):
     def open_window(self):
         self.newWindow = Td24OverrideWindow(self)
         self.newWindow.show()
+
+    def check_button_click(self):
+        #return_df = self.df.copy()
+        #return_df = return_df.drop(['Valid SMILES'], axis=1)
+        #return(return_df,True)
+        self.checkClicked.emit(self.df,self.import_check)
 
     def run_button_click(self):
         return_df = self.df.copy()
@@ -1724,26 +1737,37 @@ class MolDrawer(QWidget):
     
     def load_csv_with_validation(self, import_file: str) -> pd.DataFrame:
         importedDB = pd.read_csv(import_file)
-        validatedDB = importedDB.copy()
-        invalid_SMILES = []
-        for index, row in importedDB.iterrows():
-            dictRow = row.to_dict()
-            readMolecule = thermalDexMolecule(**dictRow)
-            readMolecule.genMol()
-            invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
-        validatedDB['Valid SMILES'] = invalid_SMILES
-        validatedDB.map(lambda x: 'Yes' if x == None else 'No')
-        self.openImportAssistent(validatedDB)
-        invalid_only_SMILES = filter(None, invalid_SMILES)
-        print(f'The following SMILES were found to be invalid: {invalid_only_SMILES}')
+        self.openImportAssistent(importedDB)
         return importedDB
     
+    def validate_import_csv(self, import_DB: pd.DataFrame, table_to_update: QTableView) -> pd.DataFrame:
+        validatedDB = import_DB.copy()
+        invalid_SMILES = []
+        readMolecules = []
+        validatedDB['readMolecule'] = validatedDB.to_dict(orient='records')
+        validatedDB['readMolecule'] = validatedDB['readMolecule'].apply(lambda x: thermalDexMolecule(**x)) #**validatedDB.apply() #thermalDexMolecule(**validatedDB.to_dict())
+        validatedDB['Valid SMILES'] = validatedDB['readMolecule'].apply(self.checkIfSMILESAreValid)
+        #for index, row in validatedDB.iterrows():
+        #    dictRow = row.to_dict()
+        #    readMolecule = thermalDexMolecule(**dictRow)
+        #    readMolecule.genMol()
+        #    invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
+        #    readMolecules.append(readMolecule)
+        #validatedDB['Valid SMILES'] = invalid_SMILES
+        print(validatedDB)
+        #validatedDB.map(lambda x: 'Yes' if x == None else 'No')
+        #validatedDB['readMolecule'] = readMolecules
+        #self.openImportAssistent(validatedDB)
+        #invalid_only_SMILES = filter(None, invalid_SMILES)
+        #print(f'The following SMILES were found to be invalid: {invalid_only_SMILES}')
+        model = PandasModelEditable(validatedDB)
+        table_to_update.setModel(model)
+        return validatedDB
+
     def run_import(self,importedDB: pd.DataFrame, import_override_protection: bool):
         imported_df = pd.DataFrame()
-        for index, row in importedDB.iterrows():
-            dictRow = row.to_dict()
-            readMolecule = thermalDexMolecule(**dictRow)
-            readMolecule.genMol()
+        readMolecules = importedDB['readMolecule'].to_list()
+        for readMolecule in readMolecules:
             self.checkIfSMILESAreValid(readMolecule)
             if readMolecule.mol is not None:
                 # Calculate Core Properties
@@ -2215,6 +2239,7 @@ class MolDrawer(QWidget):
         #df = df.rename({'index':'SMILES'})
         self.import_assist = BulkImportAssistent(pandas_dataframe=df)
         self.import_assist.submitClicked.connect(self.run_import)
+        self.import_assist.checkClicked.connect(self.validate_import_csv)
         #self.commentsWindow.submitClicked.connect(self.fileCounterUpdate)
         #self.commentsWindow.exec_()
         self.import_assist.show()
