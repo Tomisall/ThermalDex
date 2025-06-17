@@ -1775,10 +1775,12 @@ class MolDrawer(QWidget):
         print(importedDB)
         #imported_df = importedDB['gendMol'].apply(cleanMolDataFrame)
         #print(imported_df)
+        as_dicts = importedDB['gendMol'].apply(asdict).to_list()
+        as_dataframe = pd.DataFrame.from_dict(as_dicts)
 
-        sql_data = importedDB['gendMol'].apply(lambda x: self.writeToDatabase(x, defaultDB, sqlflag = False, override_protection = import_override_protection))
+        #sql_data = importedDB['gendMol'].apply(lambda x: self.writeToDatabase(x, defaultDB, sqlflag = False, override_protection = import_override_protection))
         
-        print(f'\n\n{sql_data}\n\n')
+        print(f'\nasdict output:\n{as_dataframe}\n\n')
         
         #self.sqlite_db_implementation(sql_data)
         self.import_qmsg = QMessageBox()
