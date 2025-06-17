@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QShortcut, QLabel, QLineEdit, QPushButton, QGraphicsView, QAbstractItemView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QShortcut, QLabel, QLineEdit, QPushButton, QGraphicsView, QAbstractItemView, QGraphicsScene, QFrame, QTableWidget, QTableWidgetItem, QTabWidget, QGraphicsPixmapItem,  QMessageBox, QComboBox, QSpacerItem, QCheckBox, QSizePolicy, QProgressBar
 from PyQt5.QtGui import QPixmap, QColor, QIcon, QRegExpValidator, QFont, QPalette, QKeySequence
 from PyQt5.QtCore import Qt, QRegExp, pyqtSignal, QEvent
 from thermDex.thermDexMolecule import *
@@ -168,7 +168,7 @@ class PandasModelEditable(QAbstractTableModel):
         return False
     
 class BulkImportAssistent(QWidget):
-    checkClicked = pyqtSignal(pd.DataFrame,QTableView)
+    checkClicked = pyqtSignal(pd.DataFrame,QTableView,QProgressBar)
     submitClicked = pyqtSignal(pd.DataFrame,bool)
 
     def __init__(self, pandas_dataframe):
@@ -184,6 +184,12 @@ class BulkImportAssistent(QWidget):
         self.check_button = QPushButton('Validate SMILES')
         layout.addWidget(self.check_button)
         self.check_button.clicked.connect(self.check_button_click)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.hide()
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(100)
+        layout.addWidget(self.progress_bar)
 
         self.import_check = QTableView()
         #font = QtGui.QFont()
@@ -226,10 +232,7 @@ class BulkImportAssistent(QWidget):
         self.newWindow.show()
 
     def check_button_click(self):
-        #return_df = self.df.copy()
-        #return_df = return_df.drop(['Valid SMILES'], axis=1)
-        #return(return_df,True)
-        self.checkClicked.emit(self.df,self.import_check)
+        self.checkClicked.emit(self.df,self.import_check,self.progress_bar)
 
     def run_button_click(self):
         return_df = self.df.copy()
@@ -1608,10 +1611,10 @@ class MolDrawer(QWidget):
                             ''' 
         
         for index, row in Database.iterrows():
-            dictRow = row.to_dict()
-            print(dictRow)
-            repMolecule = thermalDexMolecule(**dictRow)
-            repMolecule.genMol()
+            #dictRow = row.to_dict()
+            #print(dictRow)
+            repMolecule = row['gendMol']#thermalDexMolecule(**dictRow)
+            #repMolecule.genMol()
             imageData = repMolecule.molToBytes()
             dataURL = 'data:image/png;base64,' + imageData
             string_of_report += f'''
@@ -1740,42 +1743,44 @@ class MolDrawer(QWidget):
         self.openImportAssistent(importedDB)
         return importedDB
     
-    def validate_import_csv(self, import_DB: pd.DataFrame, table_to_update: QTableView) -> pd.DataFrame:
-        validatedDB = import_DB.copy()
-        invalid_SMILES = []
-        readMolecules = []
+    def validate_import_csv(self, import_DB: pd.DataFrame, table_to_update: QTableView, progress: QProgressBar) -> pd.DataFrame:
+        validatedDB = import_DB
+        progress.show()
         validatedDB['readMolecule'] = validatedDB.to_dict(orient='records')
+        progress.setValue(20)
         validatedDB['readMolecule'] = validatedDB['readMolecule'].apply(lambda x: thermalDexMolecule(**x)) #**validatedDB.apply() #thermalDexMolecule(**validatedDB.to_dict())
+        progress.setValue(40)
         validatedDB['Valid SMILES'] = validatedDB['readMolecule'].apply(self.checkIfSMILESAreValid)
-        #for index, row in validatedDB.iterrows():
-        #    dictRow = row.to_dict()
-        #    readMolecule = thermalDexMolecule(**dictRow)
-        #    readMolecule.genMol()
-        #    invalid_SMILES.append(self.checkIfSMILESAreValid(readMolecule))
-        #    readMolecules.append(readMolecule)
-        #validatedDB['Valid SMILES'] = invalid_SMILES
+        progress.setValue(100)
         print(validatedDB)
-        #validatedDB.map(lambda x: 'Yes' if x == None else 'No')
-        #validatedDB['readMolecule'] = readMolecules
-        #self.openImportAssistent(validatedDB)
-        #invalid_only_SMILES = filter(None, invalid_SMILES)
-        #print(f'The following SMILES were found to be invalid: {invalid_only_SMILES}')
         model = PandasModelEditable(validatedDB)
+        progress.hide()
         table_to_update.setModel(model)
         return validatedDB
 
     def run_import(self,importedDB: pd.DataFrame, import_override_protection: bool):
         imported_df = pd.DataFrame()
-        readMolecules = importedDB['readMolecule'].to_list()
-        for readMolecule in readMolecules:
-            self.checkIfSMILESAreValid(readMolecule)
-            if readMolecule.mol is not None:
+        #readMolecules = importedDB['readMolecule'].to_list()
+        #for readMolecule in readMolecules:
+        #    self.checkIfSMILESAreValid(readMolecule)
+        #    if readMolecule.mol is not None:
                 # Calculate Core Properties
-                self.genCoreValuesFromMol(readMolecule)
-            sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
-            imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
+        #        self.genCoreValuesFromMol(readMolecule)
+        #    sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
+        #    imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
         #self.openImportAssistent(sql_data)
-        self.sqlite_db_implementation(sql_data)
+
+        #import_copy = imported_df.copy()
+        importedDB['gendMol'] = importedDB['readMolecule'].apply(self.genCoreValuesFromMol)
+        print(importedDB)
+        #imported_df = importedDB['gendMol'].apply(cleanMolDataFrame)
+        #print(imported_df)
+
+        sql_data = importedDB['gendMol'].apply(lambda x: self.writeToDatabase(x, defaultDB, sqlflag = False, override_protection = import_override_protection))
+        
+        print(f'\n\n{sql_data}\n\n')
+        
+        #self.sqlite_db_implementation(sql_data)
         self.import_qmsg = QMessageBox()
         self.import_qmsg.setIcon(QMessageBox.Information)
         self.import_qmsg.setWindowTitle("ThermalDex - Info Box")
@@ -1784,7 +1789,7 @@ class MolDrawer(QWidget):
         self.import_qmsg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         returnValue = self.import_qmsg.exec()
         if returnValue == QMessageBox.Yes:
-            self.createMultiReport(imported_df)
+            self.createMultiReport(importedDB)
 
     def import_external_database(self):
         options = QFileDialog.Options()
@@ -2391,6 +2396,7 @@ class MolDrawer(QWidget):
             molecule.makeFolderForMolData()
         except:
             window.showErrorMessage("Making Folder to Hold Molecule Data Files.")
+        return molecule
 
     def createReport(self):
         #try:
@@ -2561,7 +2567,7 @@ class MolDrawer(QWidget):
         if molecule.SMILES != '' and molecule.SMILES is not None:
             molecule.mol = MolFromSmiles(molecule.SMILES)
             try:
-                realtest = molecule.molToBytes()
+                realtest = molecule.molToIMG()
             except:
                 molecule.mol = None
                 self.showErrorMessage(f'Invalid SMILES detected: {molecule.SMILES}')
