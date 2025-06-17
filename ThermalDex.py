@@ -1760,27 +1760,22 @@ class MolDrawer(QWidget):
 
     def run_import(self,importedDB: pd.DataFrame, import_override_protection: bool):
         imported_df = pd.DataFrame()
-        #readMolecules = importedDB['readMolecule'].to_list()
-        #for readMolecule in readMolecules:
-        #    self.checkIfSMILESAreValid(readMolecule)
-        #    if readMolecule.mol is not None:
-                # Calculate Core Properties
-        #        self.genCoreValuesFromMol(readMolecule)
-        #    sql_data = self.writeToDatabase(readMolecule, defaultDB, sqlflag = False, override_protection = import_override_protection)
-        #    imported_df = pd.concat([imported_df,cleanMolDataFrame(readMolecule)])
-        #self.openImportAssistent(sql_data)
-
-        #import_copy = imported_df.copy()
+        storedData = pd.read_csv(defaultDB)
         importedDB['gendMol'] = importedDB['readMolecule'].apply(self.genCoreValuesFromMol)
         print(importedDB)
-        #imported_df = importedDB['gendMol'].apply(cleanMolDataFrame)
-        #print(imported_df)
         as_dicts = importedDB['gendMol'].apply(asdict).to_list()
         as_dataframe = pd.DataFrame.from_dict(as_dicts)
-
+        new_compounds = as_dataframe[~as_dataframe['SMILES'].apply(tuple,1).isin(storedData['SMILES'].apply(tuple,1))]
+        existing_compounds = as_dataframe[as_dataframe['SMILES'].apply(tuple,1).isin(storedData['SMILES'].apply(tuple,1))]
         #sql_data = importedDB['gendMol'].apply(lambda x: self.writeToDatabase(x, defaultDB, sqlflag = False, override_protection = import_override_protection))
-        
-        print(f'\nasdict output:\n{as_dataframe}\n\n')
+        print(f'\n\nasdict output:\n{as_dataframe}\n\n')
+        print(f'\n\nnew_compounds output:\n{new_compounds}\n\n')
+        print(f'\n\nexisting_compounds output:\n{existing_compounds}\n\n')
+
+        outputData = pd.concat([storedData, new_compounds])
+        print(outputData)
+        outputData.to_csv(defaultDB, index=False)
+        #sql_data = outputData.drop('SMILES', axis=1)
         
         #self.sqlite_db_implementation(sql_data)
         self.import_qmsg = QMessageBox()
